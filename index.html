@@ -11,7 +11,6 @@
     html, body { height: 100%; overflow: hidden;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 13px; }
 
-    /* ── LAYOUT ───────────────────────────────── */
     #app { display: flex; flex-direction: column; height: 100vh; }
 
     /* ── HEADER ───────────────────────────────── */
@@ -21,8 +20,7 @@
       flex-shrink: 0; z-index: 1000; box-shadow: 0 2px 8px rgba(0,0,0,.45);
     }
     .hdr-logo {
-      width: 32px; height: 32px;
-      background: linear-gradient(135deg,#2e7d32,#43a047);
+      width: 32px; height: 32px; background: linear-gradient(135deg,#2e7d32,#43a047);
       border-radius: 7px; display: flex; align-items: center; justify-content: center;
       font-size: 16px; flex-shrink: 0;
     }
@@ -33,20 +31,20 @@
     #hdr-fit-btn {
       background: #1e3a5f; border: 1px solid #1a5276; color: #90caf9;
       padding: 5px 11px; border-radius: 5px; cursor: pointer; font-size: 11px;
-      display: flex; align-items: center; gap: 5px; transition: background .2s; white-space: nowrap;
+      display: flex; align-items: center; gap: 5px; transition: background .2s;
     }
     #hdr-fit-btn:hover { background: #1a4a7a; }
 
-    /* ── MAIN ROW ─────────────────────────────── */
+    /* ── MAIN ─────────────────────────────────── */
     #main { display: flex; flex: 1; overflow: hidden; }
 
     /* ── SIDEBAR ──────────────────────────────── */
     #sidebar {
-      width: 280px; background: #ffffff;
+      width: 280px; background: #fff;
       display: flex; flex-direction: column; flex-shrink: 0;
       overflow: hidden; z-index: 500;
       transition: width .28s cubic-bezier(.4,0,.2,1);
-      box-shadow: 2px 0 8px rgba(0,0,0,.12);
+      box-shadow: 2px 0 8px rgba(0,0,0,.10);
       border-right: 1px solid #e2e8f0;
     }
     #sidebar.collapsed { width: 0; }
@@ -58,17 +56,23 @@
     }
     .sb-head h3 { font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: #94a3b8; font-weight: 700; }
 
-    /* basemaps section */
+    /* basemaps */
     .sb-section { border-bottom: 1px solid #e2e8f0; flex-shrink: 0; }
-    .sb-section-title {
-      padding: 9px 14px 5px; font-size: 9.5px; text-transform: uppercase;
-      letter-spacing: 1.5px; color: #94a3b8; font-weight: 700;
-    }
+    .sb-section-title { padding: 9px 14px 5px; font-size: 9.5px; text-transform: uppercase; letter-spacing: 1.5px; color: #94a3b8; font-weight: 700; }
     .bm-list { padding: 0 10px 10px; display: flex; flex-direction: column; gap: 2px; }
-    .bm-group-label {
-      font-size: 9px; color: #cbd5e1; text-align: center;
-      padding: 5px 0 2px; letter-spacing: 1px; user-select: none;
+    .bm-group-label { font-size: 9px; color: #cbd5e1; text-align: center; padding: 5px 0 2px; letter-spacing: 1px; user-select: none; }
+
+    /* basemap section collapsible */
+    .sb-section-title.collapsible {
+      cursor: pointer; display: flex; align-items: center;
+      justify-content: space-between; padding-right: 14px;
+      transition: color .15s;
     }
+    .sb-section-title.collapsible:hover { color: #64748b; }
+    .sb-collapse-icon { font-size: 9px; transition: transform .2s; }
+    .sb-collapse-icon.open { transform: rotate(180deg); }
+    .bm-list.collapsed { display: none; }
+
     .bm-opt {
       display: flex; align-items: center; gap: 9px; padding: 6px 9px;
       border-radius: 6px; cursor: pointer; color: #64748b; font-size: 11.5px;
@@ -78,7 +82,7 @@
     .bm-opt.active { background: #dbeafe; color: #1d4ed8; font-weight: 600; }
     .bm-thumb { width: 26px; height: 18px; border-radius: 3px; border: 1px solid #e2e8f0; flex-shrink: 0; }
 
-    /* layers section */
+    /* layer list */
     .layers-header {
       padding: 9px 14px 5px; font-size: 9.5px; text-transform: uppercase;
       letter-spacing: 1.5px; color: #94a3b8; font-weight: 700;
@@ -90,33 +94,26 @@
     #layer-list::-webkit-scrollbar-track { background: #f8fafc; }
     #layer-list::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 2px; }
 
+    /* ── DRAG SHARED ──────────────────────────── */
+    .drag-handle {
+      color: #d1d5db; font-size: 11px; cursor: grab; flex-shrink: 0;
+      padding: 3px 3px; transition: color .15s; touch-action: none;
+      display: flex; align-items: center;
+    }
+    .drag-handle:hover { color: #94a3b8; }
+    .drag-handle:active { cursor: grabbing; }
+
     /* ── GROUP BLOCK ──────────────────────────── */
-    .group-block {
-      border-bottom: 1px solid #f1f5f9;
-      transition: opacity .15s, box-shadow .15s;
-      user-select: none;
-    }
-    .group-block.dragging {
-      opacity: .5; box-shadow: 0 4px 16px rgba(0,0,0,.18);
-    }
-    .group-block.drag-over-top    { border-top: 2px solid #3b82f6 !important; }
-    .group-block.drag-over-bottom { border-bottom: 2px solid #3b82f6 !important; }
+    .group-block { border-bottom: 1px solid #f1f5f9; }
+    .group-block.dragging { opacity: .45; }
+    .group-block.dov-top    { border-top: 2px solid #3b82f6 !important; }
+    .group-block.dov-bottom { border-bottom: 2px solid #3b82f6 !important; }
 
     .group-row {
       display: flex; align-items: center; gap: 7px;
-      padding: 7px 10px 7px 6px; background: #ffffff;
-      transition: background .12s;
+      padding: 7px 10px 7px 6px; background: #fff; transition: background .12s;
     }
     .group-row:hover { background: #f8fafc; }
-
-    /* drag handle */
-    .grp-drag {
-      color: #cbd5e1; font-size: 11px; cursor: grab;
-      padding: 3px 3px; flex-shrink: 0; touch-action: none;
-      transition: color .15s;
-    }
-    .grp-drag:hover { color: #94a3b8; }
-    .grp-drag:active { cursor: grabbing; }
 
     .grp-expand {
       color: #94a3b8; font-size: 10px; cursor: pointer;
@@ -147,12 +144,18 @@
     .sub-layers { display: none; background: #fafbfc; }
     .sub-layers.open { display: block; }
 
+    /* wrapper draggável por sub-camada */
+    .sub-item { }
+    .sub-item.dragging { opacity: .45; }
+    .sub-item.dov-top    { border-top: 2px solid #3b82f6; }
+    .sub-item.dov-bottom { border-bottom: 2px solid #3b82f6; }
+
     .sub-row {
       display: flex; align-items: center; gap: 7px;
-      padding: 5px 12px 5px 34px; transition: background .12s;
+      padding: 5px 10px 5px 8px; transition: background .12s;
     }
     .sub-row:hover { background: #f1f5f9; }
-    .sub-row.sl-hidden { opacity: .38; }
+    .sub-row.sl-hidden { opacity: .35; }
 
     .sl-toggle {
       width: 26px; height: 14px; background: #cbd5e1; border-radius: 7px;
@@ -166,12 +169,19 @@
     .sl-toggle.on { background: #22c55e; }
     .sl-toggle.on::after { transform: translateX(12px); }
 
+    /* swatch clicável → abre color picker nativo */
+    .sl-swatch-wrap { position: relative; flex-shrink: 0; width: 16px; height: 16px; }
     .sl-swatch {
-      width: 13px; height: 13px; border-radius: 3px;
-      border: 1.5px solid rgba(0,0,0,.15); flex-shrink: 0;
-      cursor: pointer; transition: transform .15s, box-shadow .15s;
+      width: 16px; height: 16px; border-radius: 3px;
+      border: 1.5px solid rgba(0,0,0,.18);
+      cursor: pointer; display: block;
+      transition: transform .15s, box-shadow .15s;
     }
-    .sl-swatch:hover { transform: scale(1.25); box-shadow: 0 0 0 2px rgba(59,130,246,.4); }
+    .sl-swatch:hover { transform: scale(1.2); box-shadow: 0 0 0 2px rgba(59,130,246,.4); }
+    .sl-cpick {
+      position: absolute; inset: 0; opacity: 0; cursor: pointer;
+      width: 100%; height: 100%; border: none; padding: 0;
+    }
 
     .sl-name { flex: 1; color: #374151; font-size: 11px;
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -186,38 +196,31 @@
     /* ── STYLE PANEL ──────────────────────────── */
     .style-panel {
       display: none; background: #f1f5f9;
-      border-top: 1px solid #e2e8f0;
-      padding: 10px 12px 10px 34px;
+      border-top: 1px solid #e2e8f0; padding: 10px 12px 10px 34px;
     }
     .style-panel.open { display: block; }
-
     .sp-row { display: flex; align-items: center; gap: 8px; margin-bottom: 7px; }
     .sp-row:last-child { margin-bottom: 0; }
-    .sp-label { font-size: 10px; color: #64748b; width: 58px; flex-shrink: 0; }
-
+    .sp-label { font-size: 10px; color: #64748b; width: 55px; flex-shrink: 0; }
     .sp-color {
       width: 28px; height: 22px; border: 1px solid #e2e8f0; border-radius: 4px;
       padding: 1px 2px; background: #fff; cursor: pointer; flex-shrink: 0;
     }
     .sp-color::-webkit-color-swatch-wrapper { padding: 0; }
     .sp-color::-webkit-color-swatch { border: none; border-radius: 2px; }
-
     .sp-slider {
       flex: 1; -webkit-appearance: none; appearance: none;
       height: 4px; background: #e2e8f0; border-radius: 2px; cursor: pointer;
     }
     .sp-slider::-webkit-slider-thumb {
       -webkit-appearance: none; width: 13px; height: 13px;
-      border-radius: 50%; background: #3b82f6; cursor: pointer; border: 2px solid #fff;
-      box-shadow: 0 1px 3px rgba(0,0,0,.2);
+      border-radius: 50%; background: #3b82f6; cursor: pointer;
+      border: 2px solid #fff; box-shadow: 0 1px 3px rgba(0,0,0,.2);
     }
     .sp-val { font-size: 10px; color: #64748b; width: 32px; text-align: right; flex-shrink: 0; }
 
     /* ── NO LAYERS ────────────────────────────── */
-    #no-layers-msg {
-      padding: 24px 14px; color: #94a3b8; font-size: 11px;
-      text-align: center; line-height: 1.8;
-    }
+    #no-layers-msg { padding: 24px 14px; color: #94a3b8; font-size: 11px; text-align: center; line-height: 1.8; }
     #no-layers-msg code { background: #f1f5f9; padding: 1px 5px; border-radius: 3px; color: #64748b; }
     .lyr-loading { padding: 7px 14px; color: #94a3b8; font-size: 11px; display: flex; align-items: center; gap: 7px; }
     .spin-sm { width:12px; height:12px; border:2px solid #e2e8f0; border-top-color:#3b82f6;
@@ -226,36 +229,30 @@
 
     /* ── MAP WRAPPER ──────────────────────────── */
     #map-wrap { flex: 1; display: flex; position: relative; overflow: hidden; }
-
     #sb-toggle {
       position: absolute; top: 50%; left: 0; transform: translateY(-50%);
-      z-index: 600; background: #ffffff; border: none; color: #94a3b8;
+      z-index: 600; background: #fff; border: 1px solid #e2e8f0; border-left: none; color: #94a3b8;
       width: 18px; height: 44px; cursor: pointer;
       display: flex; align-items: center; justify-content: center;
       border-radius: 0 6px 6px 0; font-size: 9px;
-      box-shadow: 2px 0 6px rgba(0,0,0,.15);
-      border: 1px solid #e2e8f0; border-left: none;
-      transition: background .2s, color .2s;
+      box-shadow: 2px 0 6px rgba(0,0,0,.1); transition: background .2s, color .2s;
     }
     #sb-toggle:hover { background: #f1f5f9; color: #3b82f6; }
-
     #map { flex: 1; }
-
     #coords {
       position: absolute; bottom: 22px; left: 10px;
-      background: rgba(255,255,255,.88); color: #64748b;
-      font-size: 10px; padding: 3px 8px; border-radius: 4px;
-      z-index: 400; font-family: 'Courier New', monospace; pointer-events: none;
+      background: rgba(255,255,255,.88); color: #64748b; font-size: 10px;
+      padding: 3px 8px; border-radius: 4px; z-index: 400;
+      font-family: 'Courier New', monospace; pointer-events: none;
       border: 1px solid #e2e8f0; box-shadow: 0 1px 4px rgba(0,0,0,.08);
     }
 
-    /* ── LEAFLET OVERRIDES ───────────────────── */
-    .leaflet-control-zoom { border: none !important; box-shadow: 0 2px 8px rgba(0,0,0,.18) !important; }
+    /* ── LEAFLET ──────────────────────────────── */
+    .leaflet-control-zoom { border: none !important; box-shadow: 0 2px 8px rgba(0,0,0,.15) !important; }
     .leaflet-control-zoom a {
-      background: #fff !important; color: #475569 !important;
-      border-color: #e2e8f0 !important; width: 30px !important; height: 30px !important;
-      line-height: 28px !important; font-size: 16px !important; font-weight: 400 !important;
-      transition: background .15s, color .15s !important;
+      background: #fff !important; color: #475569 !important; border-color: #e2e8f0 !important;
+      width: 30px !important; height: 30px !important; line-height: 28px !important;
+      font-size: 16px !important; font-weight: 400 !important; transition: all .15s !important;
     }
     .leaflet-control-zoom a:hover { background: #f1f5f9 !important; color: #3b82f6 !important; }
     .leaflet-control-scale-line {
@@ -265,7 +262,7 @@
     .leaflet-bar { border: none !important; }
     .leaflet-popup-content-wrapper {
       background: #fff; color: #1e293b; border-radius: 8px;
-      box-shadow: 0 4px 20px rgba(0,0,0,.18); border: 1px solid #e2e8f0;
+      box-shadow: 0 4px 20px rgba(0,0,0,.15); border: 1px solid #e2e8f0;
     }
     .leaflet-popup-tip { background: #fff; }
     .leaflet-popup-content { margin: 10px 14px; font-size: 11.5px; }
@@ -276,7 +273,7 @@
     .pop-table td:first-child { color: #94a3b8; white-space: nowrap; padding-right: 10px; }
     .pop-table td:last-child { color: #1e293b; word-break: break-word; max-width: 200px; }
 
-    /* ── LOADING OVERLAY ─────────────────────── */
+    /* ── LOADING ──────────────────────────────── */
     #loading {
       position: fixed; inset: 0; background: rgba(248,250,252,.95);
       display: flex; flex-direction: column; align-items: center;
@@ -292,19 +289,17 @@
       font-size: 11.5px; max-width: 320px; box-shadow: 0 3px 12px rgba(0,0,0,.2);
       animation: fadeIn .3s ease; }
     .toast.warn { background: #ea580c; }
-    @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
+    @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; } }
   </style>
 </head>
 <body>
 
-<!-- LOADING -->
 <div id="loading">
   <div class="spin-lg"></div>
   <div id="loading-msg">Carregando WebGIS…</div>
 </div>
 
 <div id="app">
-  <!-- HEADER -->
   <div id="header">
     <div class="hdr-logo">🌿</div>
     <div class="hdr-title">
@@ -319,64 +314,53 @@
   </div>
 
   <div id="main">
-    <!-- SIDEBAR -->
     <div id="sidebar">
       <div class="sb-head">
         <i class="fa-solid fa-layer-group" style="color:#94a3b8;font-size:12px"></i>
         <h3>Painel de Camadas</h3>
       </div>
 
-      <!-- Basemaps -->
       <div class="sb-section">
-        <div class="sb-section-title">Mapa Base</div>
-        <div class="bm-list">
+        <div class="sb-section-title collapsible" onclick="toggleBasemaps(this)">
+          <span>Mapa Base</span>
+          <i class="fa-solid fa-chevron-down sb-collapse-icon open"></i>
+        </div>
+        <div class="bm-list" id="bm-list">
           <div class="bm-group-label">— Padrão —</div>
           <div class="bm-opt active" onclick="setBasemap('osm',this)">
-            <div class="bm-thumb" style="background:linear-gradient(135deg,#b8d8b4,#85c1d0)"></div>
-            OpenStreetMap
+            <div class="bm-thumb" style="background:linear-gradient(135deg,#b8d8b4,#85c1d0)"></div>OpenStreetMap
           </div>
           <div class="bm-opt" onclick="setBasemap('carto-dark',this)">
-            <div class="bm-thumb" style="background:linear-gradient(135deg,#1a1a2e,#16213e)"></div>
-            Escuro (CARTO)
+            <div class="bm-thumb" style="background:linear-gradient(135deg,#1a1a2e,#16213e)"></div>Escuro (CARTO)
           </div>
-
           <div class="bm-group-label">— Satélite —</div>
           <div class="bm-opt" onclick="setBasemap('esri-sat',this)">
-            <div class="bm-thumb" style="background:linear-gradient(135deg,#2c3e2d,#3d6148)"></div>
-            Satélite (ESRI)
+            <div class="bm-thumb" style="background:linear-gradient(135deg,#2c3e2d,#3d6148)"></div>Satélite (ESRI)
           </div>
           <div class="bm-opt" onclick="setBasemap('google-sat',this)">
-            <div class="bm-thumb" style="background:linear-gradient(135deg,#1a3318,#2d5e2d)"></div>
-            Google Satélite
+            <div class="bm-thumb" style="background:linear-gradient(135deg,#1a3318,#2d5e2d)"></div>Google Satélite
           </div>
-
           <div class="bm-group-label">— Relevo / Topografia —</div>
           <div class="bm-opt" onclick="setBasemap('esri-topo',this)">
-            <div class="bm-thumb" style="background:linear-gradient(135deg,#d4c5a9,#a5b89a)"></div>
-            Topográfico (ESRI)
+            <div class="bm-thumb" style="background:linear-gradient(135deg,#d4c5a9,#a5b89a)"></div>Topográfico (ESRI)
           </div>
           <div class="bm-opt" onclick="setBasemap('open-topo',this)">
-            <div class="bm-thumb" style="background:linear-gradient(135deg,#c8bda0,#8fa87a)"></div>
-            OpenTopoMap
+            <div class="bm-thumb" style="background:linear-gradient(135deg,#c8bda0,#8fa87a)"></div>OpenTopoMap
           </div>
           <div class="bm-opt" onclick="setBasemap('hillshade',this)">
-            <div class="bm-thumb" style="background:linear-gradient(135deg,#d0ccc4,#8a8070)"></div>
-            Sombreamento (Relevo)
+            <div class="bm-thumb" style="background:linear-gradient(135deg,#d0ccc4,#8a8070)"></div>Sombreamento (Relevo)
           </div>
           <div class="bm-opt" onclick="setBasemap('hillshade-dark',this)">
-            <div class="bm-thumb" style="background:linear-gradient(135deg,#3a3630,#1e1b17)"></div>
-            Relevo Escuro (ESRI)
+            <div class="bm-thumb" style="background:linear-gradient(135deg,#3a3630,#1e1b17)"></div>Relevo Escuro (ESRI)
           </div>
           <div class="bm-opt" onclick="setBasemap('sat-hillshade',this)">
-            <div class="bm-thumb" style="background:linear-gradient(135deg,#2c3e2d,#6b6050)"></div>
-            Satélite + Relevo ✦
+            <div class="bm-thumb" style="background:linear-gradient(135deg,#2c3e2d,#6b6050)"></div>Satélite + Relevo ✦
           </div>
         </div>
       </div>
 
-      <!-- Layer list -->
       <div class="layers-header">
-        <span>Feições <span id="lyr-count" style="color:#cbd5e1;font-weight:400"></span></span>
+        Feições <span id="lyr-count" style="color:#cbd5e1;font-weight:400;margin-left:4px"></span>
       </div>
       <div id="layer-list">
         <div id="no-layers-msg">
@@ -386,9 +370,7 @@
         </div>
       </div>
     </div>
-    <!-- /SIDEBAR -->
 
-    <!-- MAP -->
     <div id="map-wrap">
       <button id="sb-toggle" onclick="toggleSidebar()">
         <i class="fa-solid fa-chevron-left" id="sb-icon"></i>
@@ -400,13 +382,12 @@
 </div>
 <div id="toast-box"></div>
 
-<!-- SCRIPTS -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/shpjs@latest/dist/shp.js"></script>
 <script>
 'use strict';
 
-/* ── ESTILOS PADRÃO ─────────────────────────────────────── */
+/* ── ESTILOS PADRÃO ─────────────────────────────────── */
 const STYLES = {
   limite_imovel: { color:'#000000', weight:2.5, fillOpacity:0,    opacity:1 },
   limite:        { color:'#000000', weight:2.5, fillOpacity:0,    opacity:1 },
@@ -435,43 +416,30 @@ let groups = [];
 let sbOpen = true;
 let autoColorIdx = 0;
 
-/* ── MAPA ───────────────────────────────────────────────── */
+/* ── MAPA ────────────────────────────────────────────── */
 function initMap() {
   map = L.map('map', { zoomControl:false, center:[-15.8,-47.9], zoom:5, maxZoom:22, preferCanvas:true });
   L.control.zoom({ position:'topright' }).addTo(map);
   L.control.scale({ position:'bottomright', imperial:false }).addTo(map);
 
   const T = {
-    osm:           L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-                     { attribution:'© OpenStreetMap contributors', maxZoom:19 }),
-    'carto-dark':  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
-                     { attribution:'© CARTO', maxZoom:20, subdomains:'abcd' }),
-    'esri-sat':    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-                     { attribution:'© Esri, Maxar', maxZoom:22 }),
-    'google-sat':  L.tileLayer('https://mt{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',
-                     { subdomains:'0123', attribution:'© Google', maxZoom:22 }),
-    'esri-topo':   L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}',
-                     { attribution:'© Esri', maxZoom:22 }),
-    'open-topo':   L.tileLayer('https://tile.opentopomap.org/{z}/{x}/{y}.png',
-                     { attribution:'© OpenTopoMap, © OpenStreetMap', maxZoom:17 }),
-    hillshade:     L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Elevation/World_Hillshade/MapServer/tile/{z}/{y}/{x}',
-                     { attribution:'© Esri / USGS', maxZoom:22 }),
-    'hillshade-dark': L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Elevation/World_Hillshade_Dark/MapServer/tile/{z}/{y}/{x}',
-                     { attribution:'© Esri / USGS', maxZoom:22 }),
+    osm:             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap',maxZoom:19}),
+    'carto-dark':    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{attribution:'© CARTO',maxZoom:20,subdomains:'abcd'}),
+    'esri-sat':      L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{attribution:'© Esri',maxZoom:22}),
+    'google-sat':    L.tileLayer('https://mt{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',{subdomains:'0123',attribution:'© Google',maxZoom:22}),
+    'esri-topo':     L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}',{attribution:'© Esri',maxZoom:22}),
+    'open-topo':     L.tileLayer('https://tile.opentopomap.org/{z}/{x}/{y}.png',{attribution:'© OpenTopoMap',maxZoom:17}),
+    hillshade:       L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Elevation/World_Hillshade/MapServer/tile/{z}/{y}/{x}',{attribution:'© Esri/USGS',maxZoom:22}),
+    'hillshade-dark':L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Elevation/World_Hillshade_Dark/MapServer/tile/{z}/{y}/{x}',{attribution:'© Esri/USGS',maxZoom:22}),
   };
 
   ['osm','carto-dark','esri-sat','google-sat','esri-topo','open-topo','hillshade','hillshade-dark']
     .forEach(k => { baseLayers[k] = { composite:false, tile:T[k] }; });
 
-  // Satélite + sombreamento de relevo (composto)
-  baseLayers['sat-hillshade'] = {
-    composite: true,
-    tiles: [
-      T['esri-sat'],
-      L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Elevation/World_Hillshade/MapServer/tile/{z}/{y}/{x}',
-        { attribution:'© Esri / USGS', maxZoom:22, opacity:0.45 }),
-    ],
-  };
+  baseLayers['sat-hillshade'] = { composite:true, tiles:[
+    T['esri-sat'],
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Elevation/World_Hillshade/MapServer/tile/{z}/{y}/{x}',{attribution:'© Esri/USGS',maxZoom:22,opacity:0.45}),
+  ]};
 
   T['osm'].addTo(map);
 
@@ -487,17 +455,12 @@ function setBasemap(name, el) {
     else if (map.hasLayer(bm.tile)) map.removeLayer(bm.tile);
   });
   const bm = baseLayers[name];
-  if (bm.composite) {
-    bm.tiles.forEach(t => t.addTo(map));
-    bm.tiles[0].bringToBack();
-  } else {
-    bm.tile.addTo(map); bm.tile.bringToBack();
-  }
+  if (bm.composite) { bm.tiles.forEach(t => t.addTo(map)); bm.tiles[0].bringToBack(); }
+  else { bm.tile.addTo(map); bm.tile.bringToBack(); }
   document.querySelectorAll('.bm-opt').forEach(e => e.classList.remove('active'));
   el.classList.add('active');
 }
 
-/* ── SIDEBAR ────────────────────────────────────────────── */
 function toggleSidebar() {
   sbOpen = !sbOpen;
   document.getElementById('sidebar').classList.toggle('collapsed', !sbOpen);
@@ -505,7 +468,7 @@ function toggleSidebar() {
   setTimeout(() => map.invalidateSize(), 300);
 }
 
-/* ── STYLES ─────────────────────────────────────────────── */
+/* ── ESTILO ──────────────────────────────────────────── */
 function resolveStyle(name, custom) {
   if (custom && Object.keys(custom).length > 0) return { ...STYLES.default, ...custom };
   const key = (name || '').toLowerCase().replace(/[\s\-\.]/g, '_');
@@ -515,26 +478,29 @@ function resolveStyle(name, custom) {
   const c = AUTO_PALETTE[autoColorIdx++ % AUTO_PALETTE.length];
   return { color:c, weight:1.5, fillColor:c, fillOpacity:0.35, opacity:1 };
 }
-function styleToCSS(s) {
+
+/* cor que aparece no swatch (fill se existir, senão borda) */
+function swatchColor(s) {
+  return s.fillOpacity > 0 ? (s.fillColor || s.color) : s.color;
+}
+function swatchCSS(s) {
   const fill = s.fillOpacity > 0 ? (s.fillColor || s.color) : 'transparent';
   return `background:${fill};border:2px solid ${s.color};`;
 }
 
-/* ── LOAD GROUP ─────────────────────────────────────────── */
+/* ── CARREGA GRUPO ───────────────────────────────────── */
 async function loadGroup(cfg, gIdx) {
-  const file = cfg.file, ext = file.split('.').pop().toLowerCase();
+  const ext = cfg.file.split('.').pop().toLowerCase();
   let raw;
-  if (ext === 'zip') raw = await shp(file);
-  else if (ext === 'shp') raw = await shp(file.slice(0,-4));
-  else { const r = await fetch(file); if (!r.ok) throw new Error(`HTTP ${r.status}`); raw = await r.json(); }
+  if (ext === 'zip') raw = await shp(cfg.file);
+  else if (ext === 'shp') raw = await shp(cfg.file.slice(0,-4));
+  else { const r = await fetch(cfg.file); if (!r.ok) throw new Error(`HTTP ${r.status}`); raw = await r.json(); }
 
   const items = Array.isArray(raw) ? raw : [raw];
-
   const subLayers = items.map((fc, slIdx) => {
-    const slName = fc.fileName || cfg.name;
-    const style  = resolveStyle(slName, slIdx === 0 ? cfg.style : null);
+    const slName  = fc.fileName || cfg.name;
+    const style   = resolveStyle(slName, slIdx === 0 ? cfg.style : null);
     const visible = cfg.visible !== false;
-
     const leafletLayer = L.geoJSON(fc, {
       style: () => ({ ...style }),
       pointToLayer: (feat, ll) => L.circleMarker(ll, {
@@ -552,79 +518,96 @@ async function loadGroup(cfg, gIdx) {
           { maxWidth:320 });
       },
     });
-
     if (visible) leafletLayer.addTo(map);
     return { name:slName, leafletLayer, style:{...style}, visible, bounds:leafletLayer.getBounds() };
   });
-
-  return { cfg, subLayers, expanded:false, visible: cfg.visible !== false };
+  return { cfg, subLayers, expanded:false, visible:cfg.visible !== false };
 }
 
-/* ── BUILD UI ────────────────────────────────────────────── */
+/* ── CONSTRÓI BLOCO DE GRUPO ─────────────────────────── */
 function buildGroupBlock(g, gIdx) {
   const block = document.createElement('div');
   block.className = 'group-block';
   block.id = `gb-${gIdx}`;
-  block.setAttribute('data-gidx', gIdx);
+  block.dataset.gidx = gIdx;
 
+  /* --- group row --- */
   const grpRow = document.createElement('div');
   grpRow.className = 'group-row';
   grpRow.innerHTML = `
-    <span class="grp-drag" title="Arrastar para reordenar">
+    <span class="drag-handle grp-drag-handle" title="Arrastar grupo">
       <i class="fa-solid fa-grip-vertical"></i>
     </span>
-    <span class="grp-expand" id="gexp-${gIdx}"
-          onclick="toggleGroup(${gIdx})" title="Expandir/recolher"
+    <span class="grp-expand" id="gexp-${gIdx}" onclick="toggleGroup(${gIdx})"
           style="${g.subLayers.length <= 1 ? 'visibility:hidden' : ''}">
       <i class="fa-solid fa-chevron-right"></i>
     </span>
-    <div class="grp-toggle on" id="gtg-${gIdx}" onclick="toggleGroupVis(${gIdx})"
-         title="Ligar/desligar tudo"></div>
-    <i class="fa-regular fa-folder grp-icon"></i>
+    <div class="grp-toggle on" id="gtg-${gIdx}" onclick="toggleGroupVis(${gIdx})" title="Ligar/desligar tudo"></div>
+    <i class="fa-regular fa-folder grp-icon" id="gico-${gIdx}"></i>
     <span class="grp-name" title="${g.cfg.name}">${g.cfg.name}</span>
-    <span class="grp-count">${g.subLayers.length} feat.</span>
-  `;
+    <span class="grp-count">${g.subLayers.length} feat.</span>`;
   block.appendChild(grpRow);
 
+  /* --- sub-layers container --- */
   const subCont = document.createElement('div');
-  subCont.className = 'sub-layers'; // starts collapsed
+  subCont.className = 'sub-layers';
   subCont.id = `slc-${gIdx}`;
+
   g.subLayers.forEach((sl, slIdx) => {
-    subCont.appendChild(buildSubRow(g, gIdx, sl, slIdx));
-    subCont.appendChild(buildStylePanel(gIdx, slIdx, sl));
+    subCont.appendChild(buildSubItem(g, gIdx, sl, slIdx));
   });
   block.appendChild(subCont);
 
-  // Drag & Drop
-  block.setAttribute('draggable', 'true');
-  block.addEventListener('dragstart', e => handleDragStart(e, block));
-  block.addEventListener('dragend',   e => handleDragEnd(e, block));
-  block.addEventListener('dragover',  e => handleDragOver(e, block));
-  block.addEventListener('dragleave', e => handleDragLeave(e, block));
-  block.addEventListener('drop',      e => handleDrop(e, block));
+  /* drag-and-drop para o GRUPO */
+  attachGroupDrag(block, grpRow.querySelector('.grp-drag-handle'));
 
   return block;
 }
 
-function buildSubRow(g, gIdx, sl, slIdx) {
-  const div = document.createElement('div');
-  div.className = `sub-row${sl.visible ? '' : ' sl-hidden'}`;
-  div.id = `sr-${gIdx}-${slIdx}`;
-  const sw = sl.style.fillOpacity === 0
-    ? `background:transparent;border:2px solid ${sl.style.color};`
-    : styleToCSS(sl.style);
-  div.innerHTML = `
-    <div class="sl-toggle on" id="stg-${gIdx}-${slIdx}" onclick="toggleSubLayer(${gIdx},${slIdx})"></div>
-    <div class="sl-swatch" id="ssw-${gIdx}-${slIdx}" style="${sw}"
-         onclick="toggleStylePanel(${gIdx},${slIdx})" title="Editar estilo"></div>
+/* ── CONSTRÓI SUB-ITEM (sub-row + style-panel) ────────── */
+function buildSubItem(g, gIdx, sl, slIdx) {
+  const item = document.createElement('div');
+  item.className = 'sub-item';
+  item.dataset.gidx  = gIdx;
+  item.dataset.slidx = slIdx;
+
+  /* sub-row */
+  const row = document.createElement('div');
+  row.className = `sub-row${sl.visible ? '' : ' sl-hidden'}`;
+  row.id = `sr-${gIdx}-${slIdx}`;
+
+  const hasFill   = sl.style.fillOpacity > 0;
+  const pickColor = swatchColor(sl.style);
+
+  row.innerHTML = `
+    <span class="drag-handle sl-drag-handle" title="Arrastar camada">
+      <i class="fa-solid fa-grip-vertical"></i>
+    </span>
+    <div class="sl-toggle on" id="stg-${gIdx}-${slIdx}"
+         onclick="toggleSubLayer(${gIdx},${slIdx})"></div>
+    <div class="sl-swatch-wrap" title="Clique para mudar a cor">
+      <div class="sl-swatch" id="ssw-${gIdx}-${slIdx}" style="${swatchCSS(sl.style)}"></div>
+      <input type="color" class="sl-cpick" id="cpick-${gIdx}-${slIdx}"
+             value="${pickColor}"
+             oninput="applySwatchColor(${gIdx},${slIdx},this.value)">
+    </div>
     <span class="sl-name" title="${sl.name}">${sl.name}</span>
     <div class="sl-actions">
-      <span class="sl-btn" onclick="toggleStylePanel(${gIdx},${slIdx})" title="Editar estilo">
-        <i class="fa-solid fa-palette"></i></span>
-      <span class="sl-btn" onclick="zoomToSub(${gIdx},${slIdx})" title="Zoom para camada">
+      <span class="sl-btn" onclick="toggleStylePanel(${gIdx},${slIdx})" title="Ajustes avançados (borda, opacidade)">
+        <i class="fa-solid fa-sliders"></i></span>
+      <span class="sl-btn" onclick="zoomToSub(${gIdx},${slIdx})" title="Zoom para esta camada">
         <i class="fa-solid fa-crosshairs"></i></span>
     </div>`;
-  return div;
+  item.appendChild(row);
+
+  /* style panel (avançado) */
+  const panel = buildStylePanel(gIdx, slIdx, sl);
+  item.appendChild(panel);
+
+  /* drag-and-drop para o SUB-ITEM */
+  attachSubDrag(item, row.querySelector('.sl-drag-handle'));
+
+  return item;
 }
 
 function buildStylePanel(gIdx, slIdx, sl) {
@@ -656,15 +639,13 @@ function buildStylePanel(gIdx, slIdx, sl) {
   return div;
 }
 
-/* ── INTERAÇÕES ──────────────────────────────────────────── */
+/* ── INTERAÇÕES ──────────────────────────────────────── */
 function toggleGroup(gIdx) {
-  const g = groups[gIdx];
-  g.expanded = !g.expanded;
+  const g = groups[gIdx]; g.expanded = !g.expanded;
   document.getElementById(`slc-${gIdx}`).classList.toggle('open', g.expanded);
   document.getElementById(`gexp-${gIdx}`).classList.toggle('open', g.expanded);
-  // Ícone da pasta
-  const folderIcon = document.querySelector(`#gb-${gIdx} .grp-icon`);
-  if (folderIcon) folderIcon.className = g.expanded ? 'fa-regular fa-folder-open grp-icon' : 'fa-regular fa-folder grp-icon';
+  const ico = document.getElementById(`gico-${gIdx}`);
+  ico.className = g.expanded ? 'fa-regular fa-folder-open grp-icon' : 'fa-regular fa-folder grp-icon';
 }
 
 function toggleGroupVis(gIdx) {
@@ -689,6 +670,25 @@ function toggleStylePanel(gIdx, slIdx) {
   document.getElementById(`sp-${gIdx}-${slIdx}`).classList.toggle('open');
 }
 
+/* swatch click → cor principal (fill ou borda se sem fill) */
+function applySwatchColor(gIdx, slIdx, newColor) {
+  const sl = groups[gIdx].subLayers[slIdx];
+  if (sl.style.fillOpacity > 0) {
+    sl.style.fillColor = newColor;
+    sl.leafletLayer.setStyle({ fillColor: newColor });
+    const inp = document.getElementById(`sfc-${gIdx}-${slIdx}`);
+    if (inp) inp.value = newColor;
+  } else {
+    sl.style.color = newColor;
+    sl.leafletLayer.setStyle({ color: newColor });
+    const inp = document.getElementById(`sc-${gIdx}-${slIdx}`);
+    if (inp) inp.value = newColor;
+  }
+  document.getElementById(`ssw-${gIdx}-${slIdx}`).style.cssText = swatchCSS(sl.style);
+  saveStyles(); // ← persiste
+}
+
+/* painel avançado → atualiza tudo */
 function applyStyle(gIdx, slIdx) {
   const sl    = groups[gIdx].subLayers[slIdx];
   const color = document.getElementById(`sc-${gIdx}-${slIdx}`).value;
@@ -697,10 +697,9 @@ function applyStyle(gIdx, slIdx) {
   const wt    = parseFloat(document.getElementById(`sw-${gIdx}-${slIdx}`).value);
   sl.style    = { ...sl.style, color, fillColor:fill, fillOpacity:opac, weight:wt };
   sl.leafletLayer.setStyle({ color, fillColor:fill, fillOpacity:opac, weight:wt });
-  const sw = document.getElementById(`ssw-${gIdx}-${slIdx}`);
-  sw.style.cssText = opac > 0
-    ? `background:${fill};border:2px solid ${color};`
-    : `background:transparent;border:2px solid ${color};`;
+  document.getElementById(`ssw-${gIdx}-${slIdx}`).style.cssText = swatchCSS(sl.style);
+  document.getElementById(`cpick-${gIdx}-${slIdx}`).value = swatchColor(sl.style);
+  saveStyles(); // ← persiste
 }
 
 function zoomToSub(gIdx, slIdx) {
@@ -715,66 +714,209 @@ function fitAll() {
   map.fitBounds(b, { padding:[45,45], maxZoom:18 });
 }
 
-/* ── DRAG & DROP para reordenar grupos ──────────────────── */
-let dragSrcBlock = null;
+/* ── DRAG-AND-DROP GRUPOS ────────────────────────────── */
+let dragGrpBlock = null;
 
-function handleDragStart(e, block) {
-  dragSrcBlock = block;
-  block.classList.add('dragging');
-  e.dataTransfer.effectAllowed = 'move';
-  e.dataTransfer.setData('text/plain', block.id);
-}
-
-function handleDragEnd(e, block) {
-  block.classList.remove('dragging');
-  document.querySelectorAll('.group-block').forEach(b => {
-    b.classList.remove('drag-over-top', 'drag-over-bottom');
+function attachGroupDrag(block, handle) {
+  /* só ativa draggable quando o mouse está no handle */
+  handle.addEventListener('mousedown', () => block.setAttribute('draggable', 'true'));
+  handle.addEventListener('mouseleave', () => {
+    if (dragGrpBlock !== block) block.setAttribute('draggable', 'false');
   });
-  dragSrcBlock = null;
-  rebuildLayerOrder();
+
+  block.addEventListener('dragstart', e => {
+    if (block.getAttribute('draggable') !== 'true') { e.preventDefault(); return; }
+    dragGrpBlock = block;
+    block.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', 'group');
+  });
+  block.addEventListener('dragend', () => {
+    block.classList.remove('dragging');
+    block.setAttribute('draggable', 'false');
+    document.querySelectorAll('.group-block').forEach(b => b.classList.remove('dov-top','dov-bottom'));
+    rebuildGroupOrder();
+    dragGrpBlock = null;
+  });
+  block.addEventListener('dragover', e => {
+    if (!dragGrpBlock || block === dragGrpBlock) return;
+    if (e.dataTransfer.getData && block.contains(dragSubItem)) return; // don't interfere with sub drag
+    e.preventDefault(); e.stopPropagation();
+    const mid = block.getBoundingClientRect().top + block.getBoundingClientRect().height / 2;
+    block.classList.remove('dov-top','dov-bottom');
+    block.classList.add(e.clientY < mid ? 'dov-top' : 'dov-bottom');
+  });
+  block.addEventListener('dragleave', () => block.classList.remove('dov-top','dov-bottom'));
+  block.addEventListener('drop', e => {
+    if (!dragGrpBlock || block === dragGrpBlock) return;
+    e.preventDefault(); e.stopPropagation();
+    const mid = block.getBoundingClientRect().top + block.getBoundingClientRect().height / 2;
+    const list = document.getElementById('layer-list');
+    if (e.clientY < mid) list.insertBefore(dragGrpBlock, block);
+    else list.insertBefore(dragGrpBlock, block.nextSibling);
+    block.classList.remove('dov-top','dov-bottom');
+  });
 }
 
-function handleDragOver(e, block) {
-  if (!dragSrcBlock || block === dragSrcBlock) return;
-  e.preventDefault(); e.dataTransfer.dropEffect = 'move';
-  const rect   = block.getBoundingClientRect();
-  const middle = rect.top + rect.height / 2;
-  block.classList.remove('drag-over-top', 'drag-over-bottom');
-  block.classList.add(e.clientY < middle ? 'drag-over-top' : 'drag-over-bottom');
+function rebuildGroupOrder() {
+  const newOrder = [...document.querySelectorAll('.group-block')].map(el => parseInt(el.dataset.gidx));
+  groups = newOrder.map(i => groups[i]);
+  applyLeafletZOrder();
 }
 
-function handleDragLeave(e, block) {
-  block.classList.remove('drag-over-top', 'drag-over-bottom');
+/* ── DRAG-AND-DROP SUB-ITENS ─────────────────────────── */
+let dragSubItem = null;
+let dragSubCont = null;
+
+function attachSubDrag(item, handle) {
+  handle.addEventListener('mousedown', e => {
+    item.setAttribute('draggable', 'true');
+    e.stopPropagation(); // não ativa drag do grupo
+  });
+  handle.addEventListener('mouseleave', () => {
+    if (dragSubItem !== item) item.setAttribute('draggable', 'false');
+  });
+
+  item.addEventListener('dragstart', e => {
+    if (item.getAttribute('draggable') !== 'true') { e.preventDefault(); return; }
+    dragSubItem = item;
+    dragSubCont = item.parentElement;
+    item.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', 'subitem');
+    e.stopPropagation(); // não dispara drag do grupo pai
+  });
+  item.addEventListener('dragend', e => {
+    item.classList.remove('dragging');
+    item.setAttribute('draggable', 'false');
+    document.querySelectorAll('.sub-item').forEach(i => i.classList.remove('dov-top','dov-bottom'));
+    if (dragSubCont) rebuildSubOrder(dragSubCont);
+    dragSubItem = null; dragSubCont = null;
+    e.stopPropagation();
+  });
+  item.addEventListener('dragover', e => {
+    if (!dragSubItem || item === dragSubItem) return;
+    if (item.parentElement !== dragSubCont) return;
+    e.preventDefault(); e.stopPropagation();
+    const mid = item.getBoundingClientRect().top + item.getBoundingClientRect().height / 2;
+    item.classList.remove('dov-top','dov-bottom');
+    item.classList.add(e.clientY < mid ? 'dov-top' : 'dov-bottom');
+  });
+  item.addEventListener('dragleave', e => {
+    item.classList.remove('dov-top','dov-bottom');
+    e.stopPropagation();
+  });
+  item.addEventListener('drop', e => {
+    if (!dragSubItem || item === dragSubItem) return;
+    if (item.parentElement !== dragSubCont) return;
+    e.preventDefault(); e.stopPropagation();
+    const mid = item.getBoundingClientRect().top + item.getBoundingClientRect().height / 2;
+    if (e.clientY < mid) dragSubCont.insertBefore(dragSubItem, item);
+    else dragSubCont.insertBefore(dragSubItem, item.nextSibling);
+    item.classList.remove('dov-top','dov-bottom');
+  });
 }
 
-function handleDrop(e, block) {
-  if (!dragSrcBlock || block === dragSrcBlock) return;
-  e.preventDefault();
-  const rect   = block.getBoundingClientRect();
-  const middle = rect.top + rect.height / 2;
-  const list   = document.getElementById('layer-list');
-  if (e.clientY < middle) list.insertBefore(dragSrcBlock, block);
-  else list.insertBefore(dragSrcBlock, block.nextSibling);
-  block.classList.remove('drag-over-top', 'drag-over-bottom');
+function rebuildSubOrder(subCont) {
+  const gIdx = parseInt(subCont.id.replace('slc-',''));
+  const g    = groups[gIdx];
+  const newOrder = [...subCont.querySelectorAll('.sub-item')].map(el => parseInt(el.dataset.slidx));
+  g.subLayers = newOrder.map(i => g.subLayers[i]);
+  // atualiza data-slidx
+  [...subCont.querySelectorAll('.sub-item')].forEach((el, i) => el.dataset.slidx = i);
+  applyLeafletZOrder();
 }
 
-function rebuildLayerOrder() {
-  // Sincroniza array `groups` com nova ordem DOM
-  const newOrder = [...document.querySelectorAll('.group-block')]
-    .map(el => parseInt(el.getAttribute('data-gidx')));
-  const reordered = newOrder.map(i => groups[i]);
-  groups = reordered;
-
-  // Atualiza z-order no Leaflet: último na lista = mais abaixo no mapa
-  // Processamos de trás para frente → o primeiro da lista fica no topo
-  [...reordered].reverse().forEach(g => {
+/* aplica z-order no Leaflet: primeiro da lista = mais acima */
+function applyLeafletZOrder() {
+  // Processa de trás pra frente → primeiro da lista chama bringToFront por último (fica no topo)
+  [...groups].reverse().forEach(g => {
     [...g.subLayers].reverse().forEach(sl => {
       if (sl.leafletLayer && sl.visible) sl.leafletLayer.bringToFront();
     });
   });
 }
 
-/* ── TOAST ───────────────────────────────────────────────── */
+/* ── BASEMAP SECTION TOGGLE ──────────────────────────── */
+function toggleBasemaps(titleEl) {
+  const list = document.getElementById('bm-list');
+  const icon = titleEl.querySelector('.sb-collapse-icon');
+  list.classList.toggle('collapsed');
+  icon.classList.toggle('open', !list.classList.contains('collapsed'));
+}
+
+/* ── PERSISTÊNCIA DE ESTILOS (localStorage) ──────────── */
+const STORAGE_KEY = 'dbematex_styles_v1';
+
+function styleKey(gIdx, slIdx) {
+  const g  = groups[gIdx];
+  const sl = g.subLayers[slIdx];
+  // chave baseada em nome do grupo + nome da sub-camada (estável entre sessões)
+  return `${g.cfg.id}::${sl.name}`;
+}
+
+function saveStyles() {
+  const saved = {};
+  groups.forEach((g, gIdx) => {
+    g.subLayers.forEach((sl, slIdx) => {
+      saved[styleKey(gIdx, slIdx)] = {
+        color:       sl.style.color,
+        fillColor:   sl.style.fillColor || sl.style.color,
+        fillOpacity: sl.style.fillOpacity,
+        weight:      sl.style.weight,
+        opacity:     sl.style.opacity ?? 1,
+      };
+    });
+  });
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(saved)); } catch(e) {}
+}
+
+function loadSavedStyle(gIdx, slIdx) {
+  try {
+    const all = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+    return all[styleKey(gIdx, slIdx)] || null;
+  } catch(e) { return null; }
+}
+
+/* aplica estilos salvos logo após carregar as camadas */
+function restoreSavedStyles() {
+  groups.forEach((g, gIdx) => {
+    g.subLayers.forEach((sl, slIdx) => {
+      const saved = loadSavedStyle(gIdx, slIdx);
+      if (!saved) return;
+
+      sl.style = { ...sl.style, ...saved };
+      sl.leafletLayer.setStyle({
+        color:       saved.color,
+        fillColor:   saved.fillColor,
+        fillOpacity: saved.fillOpacity,
+        weight:      saved.weight,
+        opacity:     saved.opacity,
+      });
+
+      // atualiza visuais do painel (se já existirem no DOM)
+      const sw   = document.getElementById(`ssw-${gIdx}-${slIdx}`);
+      const cp   = document.getElementById(`cpick-${gIdx}-${slIdx}`);
+      const sc   = document.getElementById(`sc-${gIdx}-${slIdx}`);
+      const sfc  = document.getElementById(`sfc-${gIdx}-${slIdx}`);
+      const so   = document.getElementById(`so-${gIdx}-${slIdx}`);
+      const sov  = document.getElementById(`sov-${gIdx}-${slIdx}`);
+      const swEl = document.getElementById(`sw-${gIdx}-${slIdx}`);
+      const swv  = document.getElementById(`swv-${gIdx}-${slIdx}`);
+
+      if (sw)  sw.style.cssText = swatchCSS(sl.style);
+      if (cp)  cp.value  = swatchColor(sl.style);
+      if (sc)  sc.value  = saved.color;
+      if (sfc) sfc.value = saved.fillColor;
+      if (so)  { so.value = Math.round(saved.fillOpacity * 100); }
+      if (sov) sov.textContent = Math.round(saved.fillOpacity * 100) + '%';
+      if (swEl){ swEl.value = saved.weight; }
+      if (swv) swv.textContent = saved.weight + 'px';
+    });
+  });
+}
+
+/* ── TOAST ───────────────────────────────────────────── */
 function toast(msg, type='error') {
   const el = document.createElement('div');
   el.className = `toast${type==='warn'?' warn':''}`;
@@ -783,7 +925,7 @@ function toast(msg, type='error') {
   setTimeout(() => el.remove(), 5500);
 }
 
-/* ── MAIN ────────────────────────────────────────────────── */
+/* ── MAIN ────────────────────────────────────────────── */
 async function main() {
   initMap();
   const loading    = document.getElementById('loading');
@@ -794,7 +936,7 @@ async function main() {
   try {
     loadingMsg.textContent = 'Carregando catálogo…';
     const resp = await fetch('data/catalog.json');
-    if (!resp.ok) throw new Error(`catalog.json não encontrado`);
+    if (!resp.ok) throw new Error('catalog.json não encontrado');
     const catalog = await resp.json();
     const defs = catalog.layers || [];
 
@@ -811,7 +953,6 @@ async function main() {
       row.innerHTML = `<div class="spin-sm"></div><span>Carregando ${def.name}…</span>`;
       layerList.appendChild(row);
       loadingMsg.textContent = `Carregando "${def.name}" (${i+1}/${defs.length})…`;
-
       try {
         const g = await loadGroup(def, i);
         groups.push(g);
@@ -826,7 +967,9 @@ async function main() {
     document.getElementById('hdr-status').textContent =
       `${groups.length} arquivo${groups.length!==1?'s':''}, ${totalSub} feição${totalSub!==1?'ões':''}`;
 
+    restoreSavedStyles(); // ← restaura cores salvas
     fitAll();
+
   } catch(err) {
     console.error(err);
     document.getElementById('hdr-status').textContent = 'Erro ao carregar';
@@ -835,7 +978,6 @@ async function main() {
         Abra com <code>python server.py</code><br>e crie o catálogo:<br><code>python gerar_catalog.py</code>`;
     } else toast(err.message);
   }
-
   loading.style.display = 'none';
 }
 
