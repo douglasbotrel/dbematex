@@ -141,8 +141,15 @@
     .grp-count { font-size: 9px; color: #94a3b8; white-space: nowrap; }
 
     /* ── SUB-LAYERS ───────────────────────────── */
-    .sub-layers { display: none; background: #fafbfc; }
+    .sub-layers { display: none; background: #fafbfc; padding-bottom: 4px; }
     .sub-layers.open { display: block; }
+
+    /* linha de hierarquia lateral */
+    .sub-layers-inner {
+      margin-left: 20px;
+      border-left: 2px solid #e2e8f0;
+      padding-top: 2px;
+    }
 
     /* wrapper draggável por sub-camada */
     .sub-item { }
@@ -152,9 +159,9 @@
 
     .sub-row {
       display: flex; align-items: center; gap: 7px;
-      padding: 5px 10px 5px 8px; transition: background .12s;
+      padding: 5px 10px 5px 10px; transition: background .12s;
     }
-    .sub-row:hover { background: #f1f5f9; }
+    .sub-row:hover { background: #eff3f8; }
     .sub-row.sl-hidden { opacity: .35; }
 
     .sl-toggle {
@@ -553,9 +560,13 @@ function buildGroupBlock(g, gIdx) {
   subCont.className = 'sub-layers';
   subCont.id = `slc-${gIdx}`;
 
+  const subInner = document.createElement('div');
+  subInner.className = 'sub-layers-inner';
+
   g.subLayers.forEach((sl, slIdx) => {
-    subCont.appendChild(buildSubItem(g, gIdx, sl, slIdx));
+    subInner.appendChild(buildSubItem(g, gIdx, sl, slIdx));
   });
+  subCont.appendChild(subInner);
   block.appendChild(subCont);
 
   /* drag-and-drop para o GRUPO */
@@ -780,7 +791,7 @@ function attachSubDrag(item, handle) {
   item.addEventListener('dragstart', e => {
     if (item.getAttribute('draggable') !== 'true') { e.preventDefault(); return; }
     dragSubItem = item;
-    dragSubCont = item.parentElement;
+    dragSubCont = item.closest('.sub-layers-inner') || item.parentElement;
     item.classList.add('dragging');
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('text/plain', 'subitem');
@@ -796,7 +807,7 @@ function attachSubDrag(item, handle) {
   });
   item.addEventListener('dragover', e => {
     if (!dragSubItem || item === dragSubItem) return;
-    if (item.parentElement !== dragSubCont) return;
+    if ((item.closest('.sub-layers-inner') || item.parentElement) !== dragSubCont) return;
     e.preventDefault(); e.stopPropagation();
     const mid = item.getBoundingClientRect().top + item.getBoundingClientRect().height / 2;
     item.classList.remove('dov-top','dov-bottom');
@@ -808,7 +819,7 @@ function attachSubDrag(item, handle) {
   });
   item.addEventListener('drop', e => {
     if (!dragSubItem || item === dragSubItem) return;
-    if (item.parentElement !== dragSubCont) return;
+    if ((item.closest('.sub-layers-inner') || item.parentElement) !== dragSubCont) return;
     e.preventDefault(); e.stopPropagation();
     const mid = item.getBoundingClientRect().top + item.getBoundingClientRect().height / 2;
     if (e.clientY < mid) dragSubCont.insertBefore(dragSubItem, item);
