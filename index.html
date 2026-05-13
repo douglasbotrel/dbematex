@@ -366,7 +366,7 @@
         <div id="no-layers-msg">
           <div style="font-size:26px;margin-bottom:8px">📂</div>
           Nenhuma camada carregada.<br>
-          Adicione ZIPs em <code>data/</code> e<br>execute <code>gerar_catalog.py</code>.
+          Adicione ZIPs em <code>data/</code> e<br>pressione <strong>F5</strong> no navegador.
         </div>
       </div>
     </div>
@@ -983,7 +983,7 @@ async function main() {
     document.getElementById('hdr-status').textContent = 'Erro ao carregar';
     if (err.message.includes('catalog.json')) {
       noMsg.innerHTML = `<div style="font-size:22px;margin-bottom:8px">⚠️</div>
-        Abra com <code>python server.py</code><br>e crie o catálogo:<br><code>python gerar_catalog.py</code>`;
+        Abra com <code>python server.py</code><br>e adicione ZIPs em <code>data/</code><br>depois pressione <strong>F5</strong>`;
     } else toast(err.message);
   }
   loading.style.display = 'none';
