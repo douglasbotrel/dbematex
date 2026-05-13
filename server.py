@@ -32,6 +32,14 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         except ValueError:
             pass
 
+    def handle_error(self, request, client_address):
+        # Suprime erros de conexão abortada pelo navegador (WinError 10053 / BrokenPipe)
+        import sys
+        exc = sys.exc_info()[1]
+        if isinstance(exc, (ConnectionAbortedError, ConnectionResetError, BrokenPipeError)):
+            return  # silencia — é normal o browser fechar a conexão cedo
+        super().handle_error(request, client_address)
+
 
 def open_browser():
     import time
