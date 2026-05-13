@@ -1,40 +1,4 @@
 {
   "title": "DBEMATEX - WebGIS Ambiental",
-  "layers": [
-    {
-      "id": "limite_imovel",
-      "name": "Limite do Imóvel",
-      "file": "data/limite_imovel.zip",
-      "visible": true,
-      "style": null
-    },
-    {
-      "id": "reserva_legal",
-      "name": "Reserva Legal",
-      "file": "data/reserva_legal.zip",
-      "visible": true,
-      "style": null
-    },
-    {
-      "id": "app",
-      "name": "APP — Área de Preservação Permanente",
-      "file": "data/app.zip",
-      "visible": true,
-      "style": null
-    },
-    {
-      "id": "hidrografia",
-      "name": "Hidrografia",
-      "file": "data/hidrografia.zip",
-      "visible": true,
-      "style": null
-    },
-    {
-      "id": "uso_solo",
-      "name": "Uso do Solo",
-      "file": "data/uso_solo.zip",
-      "visible": false,
-      "style": null
-    }
-  ]
+  "layers": []
 }
