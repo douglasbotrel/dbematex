@@ -2,16 +2,16 @@
   "title": "DBEMATEX - WebGIS Ambiental",
   "layers": [
     {
-      "id": "faz_cafe",
-      "name": "Fazenda Café",
-      "file": "data/Faz CAFE.zip",
+      "id": "faz_atlantica",
+      "name": "Fazenda Atlântica",
+      "file": "data/Faz Atlantica.zip",
       "visible": true,
       "style": null
     },
     {
-      "id": "faz_atlantica",
-      "name": "Fazenda Atlântica",
-      "file": "data/Faz Atlantica.zip",
+      "id": "faz_cafe",
+      "name": "Fazenda Café",
+      "file": "data/Faz CAFE.zip",
       "visible": true,
       "style": null
     }
