@@ -759,8 +759,8 @@ function attachGroupDrag(block, handle) {
 }
 
 function rebuildGroupOrder() {
-  const newOrder = [...document.querySelectorAll('.group-block')].map(el => parseInt(el.dataset.gidx));
-  groups = newOrder.map(i => groups[i]);
+  // NÃO reordena o array groups[] — data-gidx são índices estáveis
+  // O DOM é a fonte de verdade para a ordem visual; apenas sincroniza Leaflet
   applyLeafletZOrder();
 }
 
@@ -818,21 +818,29 @@ function attachSubDrag(item, handle) {
 }
 
 function rebuildSubOrder(subCont) {
-  const gIdx = parseInt(subCont.id.replace('slc-',''));
-  const g    = groups[gIdx];
-  const newOrder = [...subCont.querySelectorAll('.sub-item')].map(el => parseInt(el.dataset.slidx));
-  g.subLayers = newOrder.map(i => g.subLayers[i]);
-  // atualiza data-slidx
-  [...subCont.querySelectorAll('.sub-item')].forEach((el, i) => el.dataset.slidx = i);
+  // NÃO reordena g.subLayers[] — data-slidx são índices estáveis
+  // Os onclick/IDs no DOM continuam corretos pois referenciam o índice original
+  // Apenas sincroniza a z-order do Leaflet com a ordem atual do DOM
   applyLeafletZOrder();
 }
 
-/* aplica z-order no Leaflet: primeiro da lista = mais acima */
+/* aplica z-order no Leaflet baseado na ordem ATUAL do DOM
+   - lê data-gidx / data-slidx (índices estáveis, nunca mudam)
+   - processa de baixo para cima: o primeiro do DOM chama bringToFront por último → fica no topo
+*/
 function applyLeafletZOrder() {
-  // Processa de trás pra frente → primeiro da lista chama bringToFront por último (fica no topo)
-  [...groups].reverse().forEach(g => {
-    [...g.subLayers].reverse().forEach(sl => {
-      if (sl.leafletLayer && sl.visible) sl.leafletLayer.bringToFront();
+  const groupBlocks = [...document.querySelectorAll('#layer-list .group-block')];
+  // processa grupos de baixo para cima (último DOM → bringToFront primeiro)
+  [...groupBlocks].reverse().forEach(gb => {
+    const gIdx = parseInt(gb.dataset.gidx);
+    const g    = groups[gIdx];
+    if (!g) return;
+    const subItems = [...gb.querySelectorAll('.sub-item')];
+    // processa sub-itens de baixo para cima dentro do grupo
+    [...subItems].reverse().forEach(item => {
+      const slIdx = parseInt(item.dataset.slidx);
+      const sl    = g.subLayers[slIdx];
+      if (sl && sl.leafletLayer && sl.visible) sl.leafletLayer.bringToFront();
     });
   });
 }
