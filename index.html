@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DBEMATEX — WebGIS</title>
+
+  <!-- Leaflet -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+  <style>
+    /* =========================================================
+       RESET & BASE
+    ========================================================= */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; overflow: hidden;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-size: 13px; }
+
+    /* =========================================================
+       LAYOUT
+    ========================================================= */
+    #app { display: flex; flex-direction: column; height: 100vh; }
+
+    /* =========================================================
+       HEADER
+    ========================================================= */
+    #header {
+      background: #0d1b2a;
+      color: #e0f2f1;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      padding: 0 14px;
+      gap: 10px;
+      flex-shrink: 0;
+      z-index: 1000;
+      box-shadow: 0 2px 10px rgba(0,0,0,.5);
+    }
+    .hdr-logo {
+      width: 32px; height: 32px;
+      background: linear-gradient(135deg, #2e7d32, #43a047);
+      border-radius: 7px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 15px; flex-shrink: 0;
+      box-shadow: 0 0 0 2px rgba(76,175,80,.3);
+    }
+    .hdr-title { line-height: 1.2; }
+    .hdr-title h1 { font-size: 15px; font-weight: 700; letter-spacing: .5px; }
+    .hdr-title small { font-size: 9px; color: #546e7a; text-transform: uppercase; letter-spacing: 1.2px; }
+    .hdr-spacer { flex: 1; }
+    #hdr-status { font-size: 11px; color: #546e7a; }
+    #hdr-fit-btn {
+      background: #1e3a5f; border: 1px solid #1a5276; color: #90caf9;
+      padding: 5px 11px; border-radius: 5px; cursor: pointer;
+      font-size: 11px; display: flex; align-items: center; gap: 5px;
+      transition: background .2s;
+    }
+    #hdr-fit-btn:hover { background: #1a4a7a; }
+
+    /* =========================================================
+       MAIN ROW
+    ========================================================= */
+    #main { display: flex; flex: 1; overflow: hidden; }
+
+    /* =========================================================
+       SIDEBAR
+    ========================================================= */
+    #sidebar {
+      width: 272px;
+      background: #1a2533;
+      display: flex; flex-direction: column;
+      flex-shrink: 0;
+      overflow: hidden;
+      transition: width .28s cubic-bezier(.4,0,.2,1);
+      z-index: 500;
+      box-shadow: 3px 0 10px rgba(0,0,0,.35);
+    }
+    #sidebar.collapsed { width: 0; }
+
+    .sb-head {
+      padding: 11px 14px 9px;
+      background: #151e2b;
+      border-bottom: 1px solid #243447;
+      flex-shrink: 0;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .sb-head h3 { font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: #546e7a; font-weight: 700; }
+
+    /* ---------- Basemap section ---------- */
+    .sb-section { border-bottom: 1px solid #1e2e40; flex-shrink: 0; }
+    .sb-section-title {
+      padding: 9px 14px 6px;
+      font-size: 9.5px; text-transform: uppercase; letter-spacing: 1.5px;
+      color: #455a64; font-weight: 700;
+    }
+    .bm-list { padding: 0 10px 10px; display: flex; flex-direction: column; gap: 3px; }
+    .bm-opt {
+      display: flex; align-items: center; gap: 9px;
+      padding: 6px 9px; border-radius: 6px; cursor: pointer;
+      color: #90a4ae; font-size: 11.5px;
+      transition: background .15s, color .15s; user-select: none;
+    }
+    .bm-opt:hover { background: #1e2e40; }
+    .bm-opt.active { background: #1a3a5c; color: #64b5f6; }
+    .bm-thumb {
+      width: 26px; height: 18px; border-radius: 3px;
+      border: 1px solid #37474f; flex-shrink: 0;
+    }
+
+    /* ---------- Layer list ---------- */
+    .sb-section-title.layers-title {
+      display: flex; align-items: center; justify-content: space-between; padding-right: 12px;
+    }
+    #layer-list {
+      flex: 1; overflow-y: auto; padding: 4px 0 8px;
+    }
+    #layer-list::-webkit-scrollbar { width: 4px; }
+    #layer-list::-webkit-scrollbar-track { background: #1a2533; }
+    #layer-list::-webkit-scrollbar-thumb { background: #2e4057; border-radius: 2px; }
+
+    .layer-item {
+      display: flex; align-items: center; gap: 9px;
+      padding: 6px 12px; cursor: default;
+      transition: background .12s;
+    }
+    .layer-item:hover { background: #1e2e40; }
+    .layer-item.layer-hidden { opacity: .4; }
+
+    /* Toggle switch */
+    .lyr-toggle {
+      width: 30px; height: 16px; background: #37474f;
+      border-radius: 8px; position: relative; cursor: pointer;
+      flex-shrink: 0; transition: background .2s;
+    }
+    .lyr-toggle::after {
+      content: ''; position: absolute; top: 2px; left: 2px;
+      width: 12px; height: 12px; background: #fff;
+      border-radius: 50%; transition: transform .2s;
+    }
+    .lyr-toggle.on { background: #2e7d32; }
+    .lyr-toggle.on::after { transform: translateX(14px); }
+
+    /* Color swatch */
+    .lyr-swatch {
+      width: 14px; height: 14px; border-radius: 3px;
+      border: 1.5px solid rgba(255,255,255,.25); flex-shrink: 0;
+    }
+
+    .lyr-name {
+      flex: 1; color: #cfd8dc; font-size: 11.5px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .lyr-actions { display: flex; gap: 3px; }
+    .lyr-btn {
+      color: #455a64; font-size: 10px; padding: 3px 4px;
+      border-radius: 3px; cursor: pointer; transition: color .15s, background .15s;
+    }
+    .lyr-btn:hover { color: #64b5f6; background: #1e2e40; }
+
+    /* No layers placeholder */
+    #no-layers-msg {
+      padding: 22px 14px; color: #37474f;
+      font-size: 11px; text-align: center; line-height: 1.7;
+    }
+    #no-layers-msg .nlm-icon { font-size: 26px; margin-bottom: 8px; }
+    #no-layers-msg code { background: #151e2b; padding: 1px 5px; border-radius: 3px; font-size: 10.5px; }
+
+    /* Loading row */
+    .lyr-loading {
+      padding: 6px 14px; color: #37474f;
+      font-size: 11px; display: flex; align-items: center; gap: 7px;
+    }
+    .spin-sm {
+      width: 12px; height: 12px; border: 2px solid #2e4057;
+      border-top-color: #64b5f6; border-radius: 50%;
+      animation: spin .7s linear infinite; flex-shrink: 0;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* =========================================================
+       MAP WRAPPER
+    ========================================================= */
+    #map-wrap { flex: 1; display: flex; position: relative; overflow: hidden; }
+
+    /* Sidebar toggle tab */
+    #sb-toggle {
+      position: absolute; top: 50%; left: 0;
+      transform: translateY(-50%);
+      z-index: 600;
+      background: #1a2533; border: none;
+      color: #546e7a; width: 18px; height: 44px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 0 5px 5px 0;
+      font-size: 9px;
+      box-shadow: 2px 0 5px rgba(0,0,0,.4);
+      transition: background .2s, color .2s;
+    }
+    #sb-toggle:hover { background: #1e2e40; color: #64b5f6; }
+
+    #map { flex: 1; }
+
+    /* Coordinates bar */
+    #coords {
+      position: absolute; bottom: 22px; left: 10px;
+      background: rgba(13,27,42,.82); color: #546e7a;
+      font-size: 10px; padding: 3px 8px; border-radius: 4px;
+      z-index: 400; font-family: 'Courier New', monospace;
+      pointer-events: none; user-select: none;
+    }
+
+    /* =========================================================
+       LEAFLET CUSTOM STYLES
+    ========================================================= */
+    .leaflet-control-zoom { border: none !important; box-shadow: 0 2px 8px rgba(0,0,0,.4) !important; }
+    .leaflet-control-zoom a {
+      background: #1a2533 !important; color: #78909c !important;
+      border-color: #243447 !important;
+      width: 30px !important; height: 30px !important; line-height: 28px !important;
+      font-size: 16px !important; font-weight: 400 !important;
+      transition: background .15s, color .15s !important;
+    }
+    .leaflet-control-zoom a:hover { background: #243447 !important; color: #64b5f6 !important; }
+    .leaflet-control-scale-line {
+      background: rgba(13,27,42,.8) !important; color: #78909c !important;
+      border-color: #455a64 !important; border-top-color: #455a64 !important;
+      font-size: 10px !important;
+    }
+    .leaflet-bar { border: none !important; }
+
+    /* Popup */
+    .leaflet-popup-content-wrapper {
+      background: #1a2533; color: #cfd8dc;
+      border-radius: 7px; box-shadow: 0 4px 16px rgba(0,0,0,.5);
+      border: 1px solid #243447;
+    }
+    .leaflet-popup-tip { background: #1a2533; }
+    .leaflet-popup-content { margin: 10px 14px; font-size: 11.5px; }
+    .pop-title { font-size: 12px; color: #64b5f6; font-weight: 600; margin-bottom: 7px; border-bottom: 1px solid #243447; padding-bottom: 5px; }
+    .pop-table { width: 100%; border-collapse: collapse; }
+    .pop-table td { padding: 3px 4px; border-bottom: 1px solid #1e2e40; }
+    .pop-table td:first-child { color: #78909c; white-space: nowrap; padding-right: 10px; }
+    .pop-table td:last-child { color: #e0f2f1; word-break: break-word; }
+
+    /* =========================================================
+       LOADING OVERLAY
+    ========================================================= */
+    #loading {
+      position: fixed; inset: 0;
+      background: rgba(10,18,28,.9);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      z-index: 9999; color: #cfd8dc;
+      gap: 14px;
+    }
+    .spin-lg {
+      width: 42px; height: 42px;
+      border: 3px solid rgba(255,255,255,.12);
+      border-top-color: #64b5f6;
+      border-radius: 50%;
+      animation: spin .75s linear infinite;
+    }
+    #loading-msg { font-size: 13px; color: #78909c; }
+
+    /* =========================================================
+       TOAST
+    ========================================================= */
+    #toast-container {
+      position: fixed; bottom: 18px; right: 18px;
+      display: flex; flex-direction: column; gap: 8px;
+      z-index: 9998;
+    }
+    .toast {
+      background: #b71c1c; color: #fff;
+      padding: 9px 14px; border-radius: 6px;
+      font-size: 11.5px; max-width: 320px;
+      box-shadow: 0 3px 10px rgba(0,0,0,.4);
+      animation: fadeIn .3s ease;
+    }
+    .toast.warn { background: #e65100; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+  </style>
+</head>
+<body>
+
+<!-- LOADING OVERLAY -->
+<div id="loading">
+  <div class="spin-lg"></div>
+  <div id="loading-msg">Carregando WebGIS…</div>
+</div>
+
+<!-- APP -->
+<div id="app">
+
+  <!-- HEADER -->
+  <div id="header">
+    <div class="hdr-logo">🌿</div>
+    <div class="hdr-title">
+      <h1>DBEMATEX</h1>
+      <small>Sistema WebGIS Ambiental</small>
+    </div>
+    <div class="hdr-spacer"></div>
+    <button id="hdr-fit-btn" onclick="fitAll()" title="Ajustar mapa a todas as camadas">
+      <i class="fa-solid fa-expand"></i> Ajustar Mapa
+    </button>
+    <div id="hdr-status">Aguardando…</div>
+  </div>
+
+  <!-- MAIN -->
+  <div id="main">
+
+    <!-- SIDEBAR -->
+    <div id="sidebar">
+
+      <div class="sb-head">
+        <i class="fa-solid fa-layer-group" style="color:#455a64;font-size:12px"></i>
+        <h3>Painel de Camadas</h3>
+      </div>
+
+      <!-- Basemaps -->
+      <div class="sb-section">
+        <div class="sb-section-title">Mapa Base</div>
+        <div class="bm-list">
+          <div class="bm-opt active" onclick="setBasemap('osm',this)">
+            <div class="bm-thumb" style="background:linear-gradient(135deg,#b8d8b4,#85c1d0)"></div>
+            OpenStreetMap
+          </div>
+          <div class="bm-opt" onclick="setBasemap('esri-sat',this)">
+            <div class="bm-thumb" style="background:linear-gradient(135deg,#2c3e2d,#3d6148)"></div>
+            Satélite (ESRI)
+          </div>
+          <div class="bm-opt" onclick="setBasemap('esri-topo',this)">
+            <div class="bm-thumb" style="background:linear-gradient(135deg,#d4c5a9,#a5b89a)"></div>
+            Topográfico (ESRI)
+          </div>
+          <div class="bm-opt" onclick="setBasemap('google-sat',this)">
+            <div class="bm-thumb" style="background:linear-gradient(135deg,#1a3318,#2d5e2d)"></div>
+            Google Satélite
+          </div>
+        </div>
+      </div>
+
+      <!-- Layers -->
+      <div class="sb-section-title layers-title">
+        <span>Feições <span id="lyr-count" style="color:#37474f;font-weight:400"></span></span>
+      </div>
+      <div id="layer-list">
+        <div id="no-layers-msg">
+          <div class="nlm-icon">📂</div>
+          <div>
+            Nenhuma camada carregada.<br>
+            Adicione arquivos à pasta <code>data/</code><br>
+            e execute <code>gerar_catalog.py</code>.
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <!-- /SIDEBAR -->
+
+    <!-- MAP WRAPPER -->
+    <div id="map-wrap">
+      <button id="sb-toggle" onclick="toggleSidebar()" title="Mostrar/ocultar painel">
+        <i class="fa-solid fa-chevron-left" id="sb-icon"></i>
+      </button>
+      <div id="map"></div>
+      <div id="coords">Lat: —  &nbsp; Lon: —</div>
+    </div>
+
+  </div>
+</div>
+
+<div id="toast-container"></div>
+
+<!-- ============================================================
+     SCRIPTS
+============================================================ -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/shpjs@latest/dist/shp.js"></script>
+
+<script>
+'use strict';
+
+/* ============================================================
+   ESTILOS PADRÃO POR TIPO DE FEIÇÃO
+   Correspondência por substring no ID da camada
+============================================================ */
+const STYLES = {
+  limite:        { color:'#000000', weight:2.5,  opacity:1, fillOpacity:0 },
+  limite_imovel: { color:'#000000', weight:2.5,  opacity:1, fillOpacity:0 },
+  reserva_legal: { color:'#1b5e20', weight:1.5,  opacity:1, fillColor:'#4CAF50', fillOpacity:0.50 },
+  reserva:       { color:'#1b5e20', weight:1.5,  opacity:1, fillColor:'#4CAF50', fillOpacity:0.50 },
+  app:           { color:'#0d47a1', weight:1.5,  opacity:1, fillColor:'#42A5F5', fillOpacity:0.45 },
+  area_app:      { color:'#0d47a1', weight:1.5,  opacity:1, fillColor:'#42A5F5', fillOpacity:0.45 },
+  hidrografia:   { color:'#01579b', weight:1.5,  opacity:1, fillColor:'#29b6f6', fillOpacity:0.50 },
+  curso_dagua:   { color:'#0277bd', weight:2.0,  opacity:1, fillOpacity:0 },
+  corpo_dagua:   { color:'#01579b', weight:1.5,  opacity:1, fillColor:'#29b6f6', fillOpacity:0.45 },
+  uso_solo:      { color:'#424242', weight:1.0,  opacity:1, fillColor:'#FFC107', fillOpacity:0.40 },
+  uso:           { color:'#424242', weight:1.0,  opacity:1, fillColor:'#FFC107', fillOpacity:0.40 },
+  servidao:      { color:'#bf360c', weight:1.5,  opacity:1, fillColor:'#FF7043', fillOpacity:0.40, dashArray:'6,4' },
+  vegetacao:     { color:'#33691e', weight:1.0,  opacity:1, fillColor:'#8BC34A', fillOpacity:0.45 },
+  edificacao:    { color:'#37474f', weight:1.0,  opacity:1, fillColor:'#90A4AE', fillOpacity:0.70 },
+  construcao:    { color:'#37474f', weight:1.0,  opacity:1, fillColor:'#90A4AE', fillOpacity:0.70 },
+  estrada:       { color:'#795548', weight:2.5,  opacity:1, fillOpacity:0 },
+  via:           { color:'#795548', weight:2.0,  opacity:1, fillOpacity:0 },
+  ponto:         { color:'#6a1b9a', weight:1.5,  opacity:1, fillColor:'#ce93d8', fillOpacity:0.80 },
+  default:       { color:'#3388ff', weight:1.5,  opacity:1, fillColor:'#3388ff', fillOpacity:0.30 },
+};
+
+/* ============================================================
+   ESTADO GLOBAL
+============================================================ */
+let map;
+const baseLayers = {};
+let layers = [];          // array de { config, leafletLayer, style, visible, bounds }
+let sbOpen = true;
+
+/* ============================================================
+   INICIALIZAÇÃO DO MAPA
+============================================================ */
+function initMap() {
+  map = L.map('map', {
+    zoomControl: false,
+    center: [-15.8, -47.9],
+    zoom: 5,
+    maxZoom: 22,
+    preferCanvas: true,
+  });
+
+  L.control.zoom({ position: 'topright' }).addTo(map);
+  L.control.scale({ position: 'bottomright', imperial: false }).addTo(map);
+
+  // Basemaps
+  baseLayers['osm'] = L.tileLayer(
+    'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+    { attribution:'© OpenStreetMap contributors', maxZoom:19 });
+
+  baseLayers['esri-sat'] = L.tileLayer(
+    'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+    { attribution:'© Esri, Maxar, GeoEye', maxZoom:22 });
+
+  baseLayers['esri-topo'] = L.tileLayer(
+    'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}',
+    { attribution:'© Esri', maxZoom:22 });
+
+  baseLayers['google-sat'] = L.tileLayer(
+    'https://mt{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',
+    { subdomains:'0123', attribution:'© Google', maxZoom:22 });
+
+  baseLayers['osm'].addTo(map);
+
+  // Coordenadas no hover
+  map.on('mousemove', e => {
+    document.getElementById('coords').textContent =
+      `Lat: ${e.latlng.lat.toFixed(6)}   Lon: ${e.latlng.lng.toFixed(6)}`;
+  });
+}
+
+/* ============================================================
+   BASEMAP
+============================================================ */
+function setBasemap(name, el) {
+  Object.values(baseLayers).forEach(l => { if (map.hasLayer(l)) map.removeLayer(l); });
+  baseLayers[name].addTo(map);
+  baseLayers[name].bringToBack();
+  document.querySelectorAll('.bm-opt').forEach(e => e.classList.remove('active'));
+  el.classList.add('active');
+}
+
+/* ============================================================
+   SIDEBAR TOGGLE
+============================================================ */
+function toggleSidebar() {
+  sbOpen = !sbOpen;
+  document.getElementById('sidebar').classList.toggle('collapsed', !sbOpen);
+  document.getElementById('sb-icon').className =
+    sbOpen ? 'fa-solid fa-chevron-left' : 'fa-solid fa-chevron-right';
+  setTimeout(() => map.invalidateSize(), 300);
+}
+
+/* ============================================================
+   RESOLVE ESTILO
+============================================================ */
+function resolveStyle(id, custom) {
+  if (custom && Object.keys(custom).length > 0) return { ...STYLES.default, ...custom };
+  const key = (id || '').toLowerCase().replace(/[\s\-\.]/g, '_');
+  for (const [k, s] of Object.entries(STYLES)) {
+    if (k !== 'default' && key.includes(k)) return { ...s };
+  }
+  return { ...STYLES.default };
+}
+
+/* ============================================================
+   SWATCH CSS
+============================================================ */
+function swatchStyle(s) {
+  const fill = (s.fillOpacity > 0) ? (s.fillColor || s.color) : 'transparent';
+  return `background:${fill};border:2px solid ${s.color};`;
+}
+
+/* ============================================================
+   CARREGA UMA CAMADA
+============================================================ */
+async function loadLayer(cfg, idx) {
+  const style = resolveStyle(cfg.id, cfg.style);
+  const file  = cfg.file;
+  const ext   = file.split('.').pop().toLowerCase();
+
+  try {
+    let geojson;
+
+    if (ext === 'zip') {
+      geojson = await shp(file);
+    } else if (ext === 'shp') {
+      // Remove .shp; shpjs carrega .shp + .dbf automaticamente
+      geojson = await shp(file.slice(0, -4));
+    } else if (ext === 'geojson' || ext === 'json') {
+      const r = await fetch(file);
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      geojson = await r.json();
+    } else {
+      throw new Error(`Extensão não suportada: .${ext}`);
+    }
+
+    // Normaliza para FeatureCollection
+    if (Array.isArray(geojson)) {
+      geojson = {
+        type: 'FeatureCollection',
+        features: geojson.flatMap(g => g.features || [g])
+      };
+    }
+
+    const leafletLayer = L.geoJSON(geojson, {
+      style: () => style,
+      pointToLayer: (feat, latlng) => L.circleMarker(latlng, {
+        radius: 6,
+        fillColor: style.fillColor || style.color,
+        color: style.color,
+        weight: 1.5,
+        opacity: 1,
+        fillOpacity: style.fillOpacity > 0 ? style.fillOpacity : 0.8,
+      }),
+      onEachFeature: (feat, lyr) => {
+        const props = feat.properties;
+        if (!props) return;
+        const rows = Object.entries(props)
+          .filter(([, v]) => v !== null && v !== undefined && String(v).trim() !== '')
+          .map(([k, v]) => `<tr><td>${k}</td><td>${v}</td></tr>`)
+          .join('');
+        if (rows) {
+          lyr.bindPopup(
+            `<div class="pop-title"><i class="fa-solid fa-info-circle"></i> ${cfg.name}</div>
+             <table class="pop-table">${rows}</table>`,
+            { maxWidth: 320, maxHeight: 280 }
+          );
+        }
+      },
+    });
+
+    if (cfg.visible !== false) leafletLayer.addTo(map);
+
+    const bounds = leafletLayer.getBounds();
+    return { cfg, leafletLayer, style, visible: cfg.visible !== false, bounds, error: false };
+
+  } catch (err) {
+    console.error(`[${cfg.name}]`, err);
+    toast(`Erro ao carregar "${cfg.name}": ${err.message}`);
+    return { cfg, leafletLayer: null, style, visible: false, bounds: null, error: true };
+  }
+}
+
+/* ============================================================
+   CONSTRÓI ITEM NO PAINEL
+============================================================ */
+function buildLayerItem(ld, idx) {
+  const div = document.createElement('div');
+  div.className = `layer-item${ld.visible ? '' : ' layer-hidden'}`;
+  div.id = `li-${idx}`;
+
+  const noFill = ld.style.fillOpacity === 0;
+  const sw = noFill
+    ? `background:transparent;border:2px solid ${ld.style.color};`
+    : swatchStyle(ld.style);
+
+  div.innerHTML = `
+    <div class="lyr-toggle ${ld.visible ? 'on' : ''}" id="tg-${idx}"
+         onclick="toggleLayer(${idx})" title="Ligar/desligar"></div>
+    <div class="lyr-swatch" style="${sw}"></div>
+    <span class="lyr-name" title="${ld.cfg.name}">${ld.cfg.name}</span>
+    <div class="lyr-actions">
+      ${ld.leafletLayer
+        ? `<span class="lyr-btn" onclick="zoomTo(${idx})" title="Zoom para camada">
+             <i class="fa-solid fa-crosshairs"></i></span>`
+        : `<span style="color:#ef5350;font-size:10px" title="Falha ao carregar">⚠</span>`
+      }
+    </div>`;
+
+  return div;
+}
+
+/* ============================================================
+   TOGGLE VISIBILIDADE
+============================================================ */
+function toggleLayer(idx) {
+  const ld = layers[idx];
+  if (!ld.leafletLayer) return;
+  ld.visible = !ld.visible;
+  if (ld.visible) {
+    ld.leafletLayer.addTo(map);
+    document.getElementById(`li-${idx}`).classList.remove('layer-hidden');
+    document.getElementById(`tg-${idx}`).classList.add('on');
+  } else {
+    map.removeLayer(ld.leafletLayer);
+    document.getElementById(`li-${idx}`).classList.add('layer-hidden');
+    document.getElementById(`tg-${idx}`).classList.remove('on');
+  }
+}
+
+/* ============================================================
+   ZOOM PARA CAMADA
+============================================================ */
+function zoomTo(idx) {
+  const ld = layers[idx];
+  if (ld.bounds && ld.bounds.isValid()) {
+    map.fitBounds(ld.bounds, { padding: [30, 30], maxZoom: 18 });
+  }
+}
+
+/* ============================================================
+   AJUSTAR MAPA A TODAS AS CAMADAS
+============================================================ */
+function fitAll() {
+  const valid = layers.filter(ld => ld.bounds && ld.bounds.isValid());
+  if (!valid.length) { toast('Nenhuma camada com geometria válida carregada.', 'warn'); return; }
+  let combined = valid[0].bounds;
+  valid.slice(1).forEach(ld => { combined = combined.extend(ld.bounds); });
+  map.fitBounds(combined, { padding: [45, 45], maxZoom: 18 });
+}
+
+/* ============================================================
+   TOAST
+============================================================ */
+function toast(msg, type = 'error') {
+  const el = document.createElement('div');
+  el.className = `toast${type === 'warn' ? ' warn' : ''}`;
+  el.textContent = msg;
+  document.getElementById('toast-container').appendChild(el);
+  setTimeout(() => el.remove(), 5500);
+}
+
+/* ============================================================
+   STATUS BAR
+============================================================ */
+function setStatus(msg) {
+  document.getElementById('hdr-status').textContent = msg;
+}
+
+/* ============================================================
+   MAIN
+============================================================ */
+async function main() {
+  initMap();
+
+  const loading    = document.getElementById('loading');
+  const loadingMsg = document.getElementById('loading-msg');
+  const layerList  = document.getElementById('layer-list');
+  const noLayers   = document.getElementById('no-layers-msg');
+
+  try {
+    loadingMsg.textContent = 'Carregando catálogo de camadas…';
+
+    const resp = await fetch('data/catalog.json');
+    if (!resp.ok) throw new Error(`catalog.json não encontrado (HTTP ${resp.status})`);
+
+    const catalog = await resp.json();
+    document.title = (catalog.title || 'DBEMATEX') + ' — WebGIS';
+
+    const defs = catalog.layers || [];
+    if (defs.length === 0) {
+      setStatus('Sem camadas no catálogo');
+      loading.style.display = 'none';
+      return;
+    }
+
+    noLayers.style.display = 'none';
+
+    for (let i = 0; i < defs.length; i++) {
+      const def = defs[i];
+
+      // Adiciona spinner temporário
+      const row = document.createElement('div');
+      row.className = 'lyr-loading';
+      row.innerHTML = `<div class="spin-sm"></div><span>Carregando ${def.name}…</span>`;
+      layerList.appendChild(row);
+
+      loadingMsg.textContent = `Carregando "${def.name}" (${i + 1}/${defs.length})…`;
+
+      const ld = await loadLayer(def, i);
+      layers.push(ld);
+
+      row.replaceWith(buildLayerItem(ld, i));
+    }
+
+    const ok = layers.filter(l => !l.error).length;
+    document.getElementById('lyr-count').textContent = `(${ok})`;
+    setStatus(`${ok} camada${ok !== 1 ? 's' : ''} carregada${ok !== 1 ? 's' : ''}`);
+
+    fitAll();
+
+  } catch (err) {
+    console.error(err);
+    if (err.message.includes('catalog.json')) {
+      setStatus('Catálogo não encontrado — use server.py');
+      noLayers.innerHTML = `
+        <div class="nlm-icon">⚠️</div>
+        <div>Abra o WebGIS com <code>server.py</code><br>e crie o <code>data/catalog.json</code><br>executando <code>gerar_catalog.py</code>.</div>`;
+    } else {
+      setStatus('Erro ao carregar');
+      toast(err.message);
+    }
+  }
+
+  loading.style.display = 'none';
+}
+
+document.addEventListener('DOMContentLoaded', main);
+</script>
+</body>
+</html>
