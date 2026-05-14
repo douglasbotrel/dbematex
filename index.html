@@ -798,21 +798,26 @@ function applySwatchColor(gIdx, slIdx, newColor) {
     if (inp) inp.value = newColor;
   }
   document.getElementById(`ssw-${gIdx}-${slIdx}`).style.cssText = swatchCSS(sl.style);
-  saveStyles(); // ← persiste
+  if (sl.style.hatched) applyHatchToLayer(sl, gIdx, slIdx);
+  saveStyles();
 }
 
 /* painel avançado → atualiza tudo */
 function applyStyle(gIdx, slIdx) {
-  const sl    = groups[gIdx].subLayers[slIdx];
-  const color = document.getElementById(`sc-${gIdx}-${slIdx}`).value;
-  const fill  = document.getElementById(`sfc-${gIdx}-${slIdx}`).value;
-  const opac  = parseFloat(document.getElementById(`so-${gIdx}-${slIdx}`).value) / 100;
-  const wt    = parseFloat(document.getElementById(`sw-${gIdx}-${slIdx}`).value);
-  sl.style    = { ...sl.style, color, fillColor:fill, fillOpacity:opac, weight:wt };
-  sl.leafletLayer.setStyle({ color, fillColor:fill, fillOpacity:opac, weight:wt });
+  const sl      = groups[gIdx].subLayers[slIdx];
+  const color   = document.getElementById(`sc-${gIdx}-${slIdx}`).value;
+  const fill    = document.getElementById(`sfc-${gIdx}-${slIdx}`).value;
+  const opac    = parseFloat(document.getElementById(`so-${gIdx}-${slIdx}`).value) / 100;
+  const wt      = parseFloat(document.getElementById(`sw-${gIdx}-${slIdx}`).value);
+  const hatched = document.getElementById(`sh-${gIdx}-${slIdx}`)?.checked || false;
+  sl.style = { ...sl.style, color, fillColor:fill, fillOpacity:opac, weight:wt, hatched };
+  sl.leafletLayer.setStyle({ color, fillColor:fill, fillOpacity: hatched ? Math.max(opac,0.01) : opac, weight:wt });
+  if (hatched) {
+    applyHatchToLayer(sl, gIdx, slIdx);
+  }
   document.getElementById(`ssw-${gIdx}-${slIdx}`).style.cssText = swatchCSS(sl.style);
   document.getElementById(`cpick-${gIdx}-${slIdx}`).value = swatchColor(sl.style);
-  saveStyles(); // ← persiste
+  saveStyles();
 }
 
 function zoomToSub(gIdx, slIdx) {
@@ -1036,6 +1041,143 @@ function restoreSavedStyles() {
     });
   });
 }
+
+/* ── HACHURA (SVG pattern) ───────────────────────────── */
+function getOrCreateHatchPattern(gIdx, slIdx, color) {
+  const id = `hatch-${gIdx}-${slIdx}`;
+  const svg = document.querySelector('.leaflet-overlay-pane > svg');
+  if (!svg) return null;
+  let defs = svg.querySelector('defs');
+  if (!defs) {
+    defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+    svg.insertBefore(defs, svg.firstChild);
+  }
+  const old = defs.querySelector(`#${id}`); if (old) old.remove();
+  const ns = 'http://www.w3.org/2000/svg';
+  const pat = document.createElementNS(ns, 'pattern');
+  pat.setAttribute('id', id); pat.setAttribute('patternUnits','userSpaceOnUse');
+  pat.setAttribute('width','8'); pat.setAttribute('height','8');
+  const line = document.createElementNS(ns, 'line');
+  line.setAttribute('x1','0'); line.setAttribute('y1','0');
+  line.setAttribute('x2','8'); line.setAttribute('y2','8');
+  line.setAttribute('stroke', color); line.setAttribute('stroke-width','1.8');
+  pat.appendChild(line); defs.appendChild(pat);
+  return `url(#${id})`;
+}
+
+function applyHatchToLayer(sl, gIdx, slIdx) {
+  if (!sl.style.hatched) return;
+  const fillColor = sl.style.fillColor || sl.style.color;
+  const patUrl = getOrCreateHatchPattern(gIdx, slIdx, fillColor);
+  if (!patUrl) return;
+  sl.leafletLayer.eachLayer(l => {
+    if (l._path) {
+      l._path.setAttribute('fill', patUrl);
+      l._path.setAttribute('fill-opacity', '1');
+    }
+  });
+}
+
+function toggleVazado(gIdx, slIdx, isVazado) {
+  const sl = groups[gIdx].subLayers[slIdx];
+  const prevOpac = sl.style._prevFillOpacity ?? (sl.style.fillOpacity || 0.35);
+  const newOpac = isVazado ? 0 : prevOpac;
+  if (!isVazado) sl.style._prevFillOpacity = prevOpac;
+  sl.style.fillOpacity = newOpac;
+  sl.leafletLayer.setStyle({ fillOpacity: newOpac });
+  const so  = document.getElementById(`so-${gIdx}-${slIdx}`);
+  const sov = document.getElementById(`sov-${gIdx}-${slIdx}`);
+  if (so)  so.value = Math.round(newOpac * 100);
+  if (sov) sov.textContent = Math.round(newOpac * 100) + '%';
+  document.getElementById(`ssw-${gIdx}-${slIdx}`).style.cssText = swatchCSS(sl.style);
+  if (sl.style.hatched) applyHatchToLayer(sl, gIdx, slIdx);
+  saveStyles();
+}
+
+/* ── DASHBOARD ───────────────────────────────────────── */
+function layerCategory(name) {
+  const n = (name||'').toLowerCase().replace(/[\s\-\.]/g,'_');
+  if (n.includes('limite') || n.includes('perimetro') || n.includes('imovel')) return 'total';
+  if (n.includes('app') || n.includes('preserva')) return 'app';
+  if (n.includes('reserva')) return 'reserva';
+  if (n.includes('consolid')) return 'consol';
+  return 'other';
+}
+
+function fmtHa(sqm) {
+  return (sqm/10000).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+
+function calcFcArea(fc) {
+  try { return (typeof turf !== 'undefined') ? turf.area(fc) : 0; } catch(e) { return 0; }
+}
+
+const CAT_META = {
+  total:   { label:'Área Total (Limite)', color:'#1e293b', icon:'fa-vector-square' },
+  app:     { label:'APP',                 color:'#0d47a1', icon:'fa-water' },
+  reserva: { label:'Reserva Legal',       color:'#1b5e20', icon:'fa-tree' },
+  consol:  { label:'Área Consolidada',    color:'#4a148c', icon:'fa-layer-group' },
+  other:   { label:'Outras Feições',      color:'#64748b', icon:'fa-map' },
+};
+
+function buildDashboard() {
+  const body = document.getElementById('db-body');
+  if (!groups.length) {
+    body.innerHTML = '<div class="db-no-data">📂 Nenhuma camada carregada.</div>'; return;
+  }
+  const totals = {total:0,app:0,reserva:0,consol:0,other:0};
+  let html = '';
+
+  groups.forEach(g => {
+    const cats = {total:0,app:0,reserva:0,consol:0,other:0};
+    g.subLayers.forEach(sl => {
+      if (!sl.fc) return;
+      const cat = layerCategory(sl.name);
+      const area = calcFcArea(sl.fc);
+      cats[cat] += area; totals[cat] += area;
+    });
+    html += `<div class="db-card">
+      <div class="db-card-head"><i class="fa-regular fa-folder" style="color:#94a3b8"></i> ${g.cfg.name}</div>
+      <div class="db-card-body">`;
+    const hasData = Object.values(cats).some(v=>v>0);
+    if (!hasData) {
+      html += `<div style="grid-column:1/-1;color:#94a3b8;font-size:11px;text-align:center;padding:10px;">
+                 Área não disponível (verifique a projeção do shapefile)</div>`;
+    } else {
+      Object.entries(cats).forEach(([cat,sqm]) => {
+        if (sqm===0) return;
+        const m = CAT_META[cat];
+        html += `<div class="db-stat ${cat}">
+          <span class="db-stat-label"><i class="fa-solid ${m.icon}" style="color:${m.color};font-size:9px"></i> ${m.label}</span>
+          <span class="db-stat-value">${fmtHa(sqm)}</span>
+          <span class="db-stat-unit">hectares</span>
+        </div>`;
+      });
+    }
+    html += `</div></div>`;
+  });
+
+  if (Object.values(totals).some(v=>v>0)) {
+    html += `<div class="db-totals-card">
+      <div class="db-totals-head"><i class="fa-solid fa-sigma"></i> Totais Gerais — Todas as Fazendas</div>
+      <div class="db-totals-body">`;
+    Object.entries(totals).forEach(([cat,sqm]) => {
+      if (sqm===0) return;
+      const m = CAT_META[cat];
+      html += `<div class="db-tot-stat">
+        <span class="db-tot-label"><i class="fa-solid ${m.icon}" style="color:${m.color};font-size:9px"></i> ${m.label}</span>
+        <span class="db-tot-value">${fmtHa(sqm)}</span>
+        <span class="db-tot-unit">hectares</span>
+      </div>`;
+    });
+    html += `</div></div>`;
+  }
+  body.innerHTML = html;
+}
+
+function openDashboard()  { buildDashboard(); document.getElementById('dashboard-overlay').classList.add('open'); }
+function closeDashboard() { document.getElementById('dashboard-overlay').classList.remove('open'); }
+function dashOverlayClick(e) { if (e.target===document.getElementById('dashboard-overlay')) closeDashboard(); }
 
 /* ── TOAST ───────────────────────────────────────────── */
 function toast(msg, type='error') {
