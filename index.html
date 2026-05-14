@@ -20,9 +20,8 @@
       flex-shrink: 0; z-index: 1000; box-shadow: 0 2px 8px rgba(0,0,0,.45);
     }
     .hdr-logo {
-      width: 32px; height: 32px; background: linear-gradient(135deg,#2e7d32,#43a047);
-      border-radius: 7px; display: flex; align-items: center; justify-content: center;
-      font-size: 16px; flex-shrink: 0;
+      display: flex; align-items: center; flex-shrink: 0;
+      height: 50px; padding: 4px 0;
     }
     .hdr-title h1 { font-size: 15px; font-weight: 700; }
     .hdr-title small { font-size: 9px; color: #546e7a; text-transform: uppercase; letter-spacing: 1px; display: block; }
@@ -333,6 +332,7 @@
     .db-stat-label { font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: #94a3b8; font-weight: 700; }
     .db-stat-value { font-size: 16px; font-weight: 700; color: #1e293b; }
     .db-stat-unit { font-size: 10px; color: #94a3b8; margin-top: -2px; }
+    .db-stat-unit strong { color: #475569; font-weight: 700; }
     .db-stat.total   { border-left-color: #1e293b; }
     .db-stat.app     { border-left-color: #0d47a1; }
     .db-stat.reserva { border-left-color: #1b5e20; }
@@ -377,27 +377,27 @@
 
 <div id="app">
   <div id="header">
-    <div class="hdr-logo" style="display:flex;align-items:center;gap:0;flex-shrink:0;">
+    <div class="hdr-logo">
       <!-- Logo Ematex Têxtil — SVG inline -->
-      <svg viewBox="0 0 155 42" height="38" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0">
-        <!-- Ícone: duas faixas diagonais vermelhas -->
-        <g>
-          <!-- faixa superior -->
-          <path d="M2,4 L22,4 Q26,4 28,8 L18,20 Q16,24 12,24 L2,24 Q-2,24 0,20 Z" fill="#cc0018"/>
-          <path d="M2,4 L22,4 Q26,4 28,8 L18,8 Q16,8 14,12 L2,12 Z" fill="#a80014"/>
-          <!-- faixa inferior -->
-          <path d="M6,28 L26,28 Q30,28 32,32 L22,44 Q20,48 16,48 L6,48 Q2,48 4,44 Z" fill="#cc0018"/>
-          <path d="M6,28 L26,28 Q30,28 32,32 L22,32 Q20,32 18,36 L6,36 Z" fill="#a80014"/>
-        </g>
-        <!-- Texto "Ematex" -->
-        <text x="36" y="24" font-family="'Segoe UI',Arial,sans-serif" font-size="17" font-weight="700" fill="#e8e8e8" letter-spacing="0.3">Ematex</text>
-        <!-- Texto "TÊXTIL" -->
-        <text x="37" y="35" font-family="'Segoe UI',Arial,sans-serif" font-size="8" font-weight="600" fill="#7a9ab0" letter-spacing="3.5">TÊXTIL</text>
+      <svg viewBox="0 0 200 46" height="42" xmlns="http://www.w3.org/2000/svg">
+        <!-- ícone esquerdo: duas faixas diagonais vermelhas -->
+        <!-- faixa superior -->
+        <polygon points="0,4  26,4  34,16  8,16"  fill="#d40018"/>
+        <polygon points="0,4  26,4  23,9   3,9"   fill="#9a0012"/>
+        <!-- faixa inferior -->
+        <polygon points="4,20 30,20 38,32 12,32"  fill="#d40018"/>
+        <polygon points="4,20 30,20 27,25  7,25"  fill="#9a0012"/>
+        <!-- separador sutil entre as faixas -->
+        <line x1="0" y1="16" x2="8" y2="16" stroke="#7a000e" stroke-width="1"/>
+        <!-- Texto "Ematex" grande -->
+        <text x="46" y="27"
+              font-family="'Segoe UI',Helvetica,Arial,sans-serif"
+              font-size="21" font-weight="800" fill="#f0f0f0" letter-spacing="0.4">Ematex</text>
+        <!-- Texto "TÊXTIL" espaçado -->
+        <text x="48" y="39"
+              font-family="'Segoe UI',Helvetica,Arial,sans-serif"
+              font-size="8.5" font-weight="600" fill="#7aaabb" letter-spacing="4.2">TÊXTIL</text>
       </svg>
-    </div>
-    <div class="hdr-title">
-      <h1>DBEMATEX</h1>
-      <small>Sistema WebGIS Ambiental</small>
     </div>
     <div class="hdr-spacer"></div>
     <button id="hdr-dash-btn" onclick="openDashboard()"
@@ -659,7 +659,7 @@ function buildGroupBlock(g, gIdx) {
     <i class="fa-regular fa-folder grp-icon" id="gico-${gIdx}"></i>
     <span class="grp-name" title="${g.cfg.name}">${g.cfg.name}</span>
     <span class="grp-count">${g.subLayers.length} feat.</span>
-    <span class="sl-btn grp-fit-btn" onclick="fitGroup(${gIdx})" title="Centralizar nesta fazenda">
+    <span class="sl-btn grp-fit-btn" onclick="fitGroup(${gIdx},event)" title="Centralizar nesta fazenda">
       <i class="fa-solid fa-crosshairs"></i>
     </span>`;
   block.appendChild(grpRow);
@@ -842,11 +842,21 @@ function zoomToSub(gIdx, slIdx) {
   if (sl.bounds && sl.bounds.isValid()) map.fitBounds(sl.bounds, { padding:[30,30], maxZoom:18 });
 }
 
-function fitGroup(gIdx) {
+function fitGroup(gIdx, e) {
+  if (e) e.stopPropagation();
   const g = groups[gIdx];
-  const valid = g.subLayers.filter(sl => sl.bounds && sl.bounds.isValid()).map(sl => sl.bounds);
-  if (!valid.length) { toast('Sem dados para centralizar.','warn'); return; }
-  let b = valid[0]; valid.slice(1).forEach(x => b = b.extend(x));
+  if (!g) return;
+  let b = null;
+  g.subLayers.forEach(sl => {
+    try {
+      // tenta getBounds() ao vivo primeiro; cai no bounds salvo se falhar
+      const lb = sl.leafletLayer.getBounds && sl.leafletLayer.getBounds();
+      const usable = (lb && lb.isValid()) ? lb : (sl.bounds && sl.bounds.isValid() ? sl.bounds : null);
+      if (!usable) return;
+      b = b ? b.extend(usable) : L.latLngBounds(usable.getSouthWest(), usable.getNorthEast());
+    } catch(_) {}
+  });
+  if (!b || !b.isValid()) { toast('Sem dados válidos para centralizar.','warn'); return; }
   map.fitBounds(b, { padding:[45,45], maxZoom:18 });
 }
 
@@ -1175,54 +1185,70 @@ const CAT_META = {
   other:   { label:'Outras Feições',      color:'#64748b', icon:'fa-map' },
 };
 
+function fmtPct(part, total) {
+  if (!total || total === 0) return '';
+  const pct = (part / total * 100);
+  return pct.toFixed(1).replace('.', ',') + '%';
+}
+
 function buildDashboard() {
   const body = document.getElementById('db-body');
   if (!groups.length) {
     body.innerHTML = '<div class="db-no-data">📂 Nenhuma camada carregada.</div>'; return;
   }
-  const totals = {total:0,app:0,reserva:0,consol:0,other:0};
+  const totals = {total:0, app:0, reserva:0, consol:0, other:0};
   let html = '';
 
   groups.forEach(g => {
-    const cats = {total:0,app:0,reserva:0,consol:0,other:0};
+    const cats = {total:0, app:0, reserva:0, consol:0, other:0};
     g.subLayers.forEach(sl => {
       if (!sl.fc) return;
-      const cat = layerCategory(sl.name);
-      const area = calcFcArea(sl.fc);
-      cats[cat] += area; totals[cat] += area;
+      cats[layerCategory(sl.name)] += calcFcArea(sl.fc);
     });
+    Object.entries(cats).forEach(([k,v]) => { totals[k] += v; });
+
+    const totalRef = cats.total || 0;   // área total desta fazenda = base para %
+
     html += `<div class="db-card">
       <div class="db-card-head"><i class="fa-regular fa-folder" style="color:#94a3b8"></i> ${g.cfg.name}</div>
       <div class="db-card-body">`;
-    const hasData = Object.values(cats).some(v=>v>0);
+    const hasData = Object.values(cats).some(v => v > 0);
     if (!hasData) {
       html += `<div style="grid-column:1/-1;color:#94a3b8;font-size:11px;text-align:center;padding:10px;">
                  Área não disponível (verifique a projeção do shapefile)</div>`;
     } else {
-      Object.entries(cats).forEach(([cat,sqm]) => {
-        if (sqm===0) return;
-        const m = CAT_META[cat];
+      Object.entries(cats).forEach(([cat, sqm]) => {
+        if (sqm === 0) return;
+        const m   = CAT_META[cat];
+        const pct = cat === 'total' ? '' : fmtPct(sqm, totalRef);
         html += `<div class="db-stat ${cat}">
-          <span class="db-stat-label"><i class="fa-solid ${m.icon}" style="color:${m.color};font-size:9px"></i> ${m.label}</span>
+          <div style="display:flex;align-items:baseline;justify-content:space-between;gap:4px;">
+            <span class="db-stat-label">
+              <i class="fa-solid ${m.icon}" style="color:${m.color};font-size:8px"></i> ${m.label}
+            </span>
+            ${pct ? `<span style="font-size:10px;font-weight:700;color:${m.color};opacity:.85">${pct}</span>` : ''}
+          </div>
           <span class="db-stat-value">${fmtHa(sqm)}</span>
-          <span class="db-stat-unit">hectares</span>
+          <span class="db-stat-unit">hectares${pct ? ` · <strong>${pct}</strong> da área total` : ''}</span>
         </div>`;
       });
     }
     html += `</div></div>`;
   });
 
-  if (Object.values(totals).some(v=>v>0)) {
+  if (Object.values(totals).some(v => v > 0)) {
+    const totalRefGeral = totals.total || 0;
     html += `<div class="db-totals-card">
       <div class="db-totals-head"><i class="fa-solid fa-sigma"></i> Totais Gerais — Todas as Fazendas</div>
       <div class="db-totals-body">`;
-    Object.entries(totals).forEach(([cat,sqm]) => {
-      if (sqm===0) return;
-      const m = CAT_META[cat];
+    Object.entries(totals).forEach(([cat, sqm]) => {
+      if (sqm === 0) return;
+      const m   = CAT_META[cat];
+      const pct = cat === 'total' ? '' : fmtPct(sqm, totalRefGeral);
       html += `<div class="db-tot-stat">
-        <span class="db-tot-label"><i class="fa-solid ${m.icon}" style="color:${m.color};font-size:9px"></i> ${m.label}</span>
+        <span class="db-tot-label"><i class="fa-solid ${m.icon}" style="color:${m.color};font-size:8px"></i> ${m.label}</span>
         <span class="db-tot-value">${fmtHa(sqm)}</span>
-        <span class="db-tot-unit">hectares</span>
+        <span class="db-tot-unit">hectares${pct ? ` · <strong style="color:#90caf9">${pct}</strong>` : ''}</span>
       </div>`;
     });
     html += `</div></div>`;
