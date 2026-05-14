@@ -139,6 +139,8 @@
     .grp-name { flex: 1; color: #1e293b; font-size: 12px; font-weight: 600;
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .grp-count { font-size: 9px; color: #94a3b8; white-space: nowrap; }
+    .grp-fit-btn { font-size: 11px; color: #94a3b8; padding: 3px 5px; border-radius: 4px; cursor: pointer; transition: color .15s, background .15s; }
+    .grp-fit-btn:hover { color: #3b82f6; background: #eff6ff; }
 
     /* ── SUB-LAYERS ───────────────────────────── */
     .sub-layers { display: none; background: #fafbfc; padding-bottom: 4px; }
@@ -375,11 +377,23 @@
 
 <div id="app">
   <div id="header">
-    <div class="hdr-logo">
-      <img src="logo.png" alt="Ematex" id="hdr-logo-img"
-           style="height:38px;mix-blend-mode:screen;object-fit:contain;"
-           onerror="this.style.display='none';document.getElementById('hdr-logo-fallback').style.display='flex'">
-      <div id="hdr-logo-fallback" style="display:none;width:32px;height:32px;background:linear-gradient(135deg,#2e7d32,#43a047);border-radius:7px;align-items:center;justify-content:center;font-size:16px;">🌿</div>
+    <div class="hdr-logo" style="display:flex;align-items:center;gap:0;flex-shrink:0;">
+      <!-- Logo Ematex Têxtil — SVG inline -->
+      <svg viewBox="0 0 155 42" height="38" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0">
+        <!-- Ícone: duas faixas diagonais vermelhas -->
+        <g>
+          <!-- faixa superior -->
+          <path d="M2,4 L22,4 Q26,4 28,8 L18,20 Q16,24 12,24 L2,24 Q-2,24 0,20 Z" fill="#cc0018"/>
+          <path d="M2,4 L22,4 Q26,4 28,8 L18,8 Q16,8 14,12 L2,12 Z" fill="#a80014"/>
+          <!-- faixa inferior -->
+          <path d="M6,28 L26,28 Q30,28 32,32 L22,44 Q20,48 16,48 L6,48 Q2,48 4,44 Z" fill="#cc0018"/>
+          <path d="M6,28 L26,28 Q30,28 32,32 L22,32 Q20,32 18,36 L6,36 Z" fill="#a80014"/>
+        </g>
+        <!-- Texto "Ematex" -->
+        <text x="36" y="24" font-family="'Segoe UI',Arial,sans-serif" font-size="17" font-weight="700" fill="#e8e8e8" letter-spacing="0.3">Ematex</text>
+        <!-- Texto "TÊXTIL" -->
+        <text x="37" y="35" font-family="'Segoe UI',Arial,sans-serif" font-size="8" font-weight="600" fill="#7a9ab0" letter-spacing="3.5">TÊXTIL</text>
+      </svg>
     </div>
     <div class="hdr-title">
       <h1>DBEMATEX</h1>
@@ -644,7 +658,10 @@ function buildGroupBlock(g, gIdx) {
     <div class="grp-toggle on" id="gtg-${gIdx}" onclick="toggleGroupVis(${gIdx})" title="Ligar/desligar tudo"></div>
     <i class="fa-regular fa-folder grp-icon" id="gico-${gIdx}"></i>
     <span class="grp-name" title="${g.cfg.name}">${g.cfg.name}</span>
-    <span class="grp-count">${g.subLayers.length} feat.</span>`;
+    <span class="grp-count">${g.subLayers.length} feat.</span>
+    <span class="sl-btn grp-fit-btn" onclick="fitGroup(${gIdx})" title="Centralizar nesta fazenda">
+      <i class="fa-solid fa-crosshairs"></i>
+    </span>`;
   block.appendChild(grpRow);
 
   /* --- sub-layers container --- */
@@ -825,6 +842,14 @@ function zoomToSub(gIdx, slIdx) {
   if (sl.bounds && sl.bounds.isValid()) map.fitBounds(sl.bounds, { padding:[30,30], maxZoom:18 });
 }
 
+function fitGroup(gIdx) {
+  const g = groups[gIdx];
+  const valid = g.subLayers.filter(sl => sl.bounds && sl.bounds.isValid()).map(sl => sl.bounds);
+  if (!valid.length) { toast('Sem dados para centralizar.','warn'); return; }
+  let b = valid[0]; valid.slice(1).forEach(x => b = b.extend(x));
+  map.fitBounds(b, { padding:[45,45], maxZoom:18 });
+}
+
 function fitAll() {
   const all = groups.flatMap(g => g.subLayers).filter(sl => sl.bounds && sl.bounds.isValid()).map(sl => sl.bounds);
   if (!all.length) { toast('Nenhuma camada válida.','warn'); return; }
@@ -991,6 +1016,8 @@ function saveStyles() {
         fillOpacity: sl.style.fillOpacity,
         weight:      sl.style.weight,
         opacity:     sl.style.opacity ?? 1,
+        hatched:     sl.style.hatched || false,
+        vazado:      sl.style.vazado  || false,
       };
     });
   });
@@ -1038,6 +1065,20 @@ function restoreSavedStyles() {
       if (sov) sov.textContent = Math.round(saved.fillOpacity * 100) + '%';
       if (swEl){ swEl.value = saved.weight; }
       if (swv) swv.textContent = saved.weight + 'px';
+
+      /* restaura hachura e vazado */
+      if (saved.hatched) {
+        sl.style.hatched = true;
+        const hchk = document.getElementById(`sh-${gIdx}-${slIdx}`);
+        if (hchk) hchk.checked = true;
+        applyHatchToLayer(sl, gIdx, slIdx);
+      }
+      if (saved.vazado) {
+        sl.style.vazado = true;
+        const vchk = document.getElementById(`sv-${gIdx}-${slIdx}`);
+        if (vchk) vchk.checked = true;
+        toggleVazado(gIdx, slIdx, true);
+      }
     });
   });
 }
@@ -1072,25 +1113,39 @@ function applyHatchToLayer(sl, gIdx, slIdx) {
   if (!patUrl) return;
   sl.leafletLayer.eachLayer(l => {
     if (l._path) {
+      /* usa style property (prioridade sobre setAttribute no Leaflet moderno) */
+      l._path.style.fill = patUrl;
+      l._path.style.fillOpacity = '1';
       l._path.setAttribute('fill', patUrl);
       l._path.setAttribute('fill-opacity', '1');
     }
   });
 }
 
+/* Vazado: fill completamente transparente — sem linhas, apenas contorno.
+   Tem prioridade sobre hachurado. */
 function toggleVazado(gIdx, slIdx, isVazado) {
   const sl = groups[gIdx].subLayers[slIdx];
-  const prevOpac = sl.style._prevFillOpacity ?? (sl.style.fillOpacity || 0.35);
-  const newOpac = isVazado ? 0 : prevOpac;
-  if (!isVazado) sl.style._prevFillOpacity = prevOpac;
-  sl.style.fillOpacity = newOpac;
-  sl.leafletLayer.setStyle({ fillOpacity: newOpac });
-  const so  = document.getElementById(`so-${gIdx}-${slIdx}`);
-  const sov = document.getElementById(`sov-${gIdx}-${slIdx}`);
-  if (so)  so.value = Math.round(newOpac * 100);
-  if (sov) sov.textContent = Math.round(newOpac * 100) + '%';
+  sl.style.vazado = isVazado;
+
+  if (isVazado) {
+    /* remove qualquer fill, inclusive o hachura — o usuário quer ver a camada de baixo */
+    sl.leafletLayer.eachLayer(l => {
+      if (l._path) {
+        l._path.style.fill = 'none';
+        l._path.style.fillOpacity = '0';
+        l._path.setAttribute('fill', 'none');
+        l._path.setAttribute('fill-opacity', '0');
+      }
+    });
+  } else {
+    /* restaura: sólido ou hachura conforme o estado */
+    const opac = sl.style.fillOpacity > 0 ? sl.style.fillOpacity : 0.35;
+    sl.leafletLayer.setStyle({ fillColor: sl.style.fillColor || sl.style.color, fillOpacity: opac });
+    if (sl.style.hatched) applyHatchToLayer(sl, gIdx, slIdx);
+  }
+
   document.getElementById(`ssw-${gIdx}-${slIdx}`).style.cssText = swatchCSS(sl.style);
-  if (sl.style.hatched) applyHatchToLayer(sl, gIdx, slIdx);
   saveStyles();
 }
 
