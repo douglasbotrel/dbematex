@@ -1279,7 +1279,7 @@ async function main() {
 
   try {
     loadingMsg.textContent = 'Carregando catálogo…';
-    const resp = await fetch('data/catalog.json');
+    const resp = await fetch('data/catalog.json?v=' + Date.now(), { cache: 'no-store' });
     if (!resp.ok) throw new Error('catalog.json não encontrado');
     const catalog = await resp.json();
     const defs = catalog.layers || [];
