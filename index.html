@@ -501,25 +501,65 @@
 'use strict';
 
 /* ── ESTILOS PADRÃO ─────────────────────────────────── */
+/* Regra geral: borda preta em todos os polígonos.
+   Ordem importa — mais específico ANTES do mais genérico. */
 const STYLES = {
-  limite_imovel: { color:'#000000', weight:2.5, fillOpacity:0,    opacity:1 },
-  limite:        { color:'#000000', weight:2.5, fillOpacity:0,    opacity:1 },
-  reserva_legal: { color:'#1b5e20', weight:1.5, fillColor:'#4CAF50', fillOpacity:0.50 },
-  reserva:       { color:'#1b5e20', weight:1.5, fillColor:'#4CAF50', fillOpacity:0.50 },
-  consolidado:   { color:'#4a148c', weight:1.5, fillColor:'#ce93d8', fillOpacity:0.40 },
-  app:           { color:'#0d47a1', weight:1.5, fillColor:'#42A5F5', fillOpacity:0.45 },
-  area_app:      { color:'#0d47a1', weight:1.5, fillColor:'#42A5F5', fillOpacity:0.45 },
-  hidrografia:   { color:'#01579b', weight:1.5, fillColor:'#29b6f6', fillOpacity:0.50 },
-  curso_dagua:   { color:'#0277bd', weight:2.0, fillOpacity:0,    opacity:1 },
-  corpo_dagua:   { color:'#01579b', weight:1.5, fillColor:'#29b6f6', fillOpacity:0.45 },
-  uso_solo:      { color:'#424242', weight:1.0, fillColor:'#FFC107', fillOpacity:0.40 },
-  uso:           { color:'#424242', weight:1.0, fillColor:'#FFC107', fillOpacity:0.40 },
-  servidao:      { color:'#bf360c', weight:1.5, fillColor:'#FF7043', fillOpacity:0.40, dashArray:'6,4' },
-  vegetacao:     { color:'#33691e', weight:1.0, fillColor:'#8BC34A', fillOpacity:0.45 },
-  edificacao:    { color:'#37474f', weight:1.0, fillColor:'#90A4AE', fillOpacity:0.70 },
-  estrada:       { color:'#795548', weight:2.5, fillOpacity:0,    opacity:1 },
-  via:           { color:'#795548', weight:2.0, fillOpacity:0,    opacity:1 },
-  default:       { color:'#3388ff', weight:1.5, fillColor:'#3388ff', fillOpacity:0.30 },
+  // Limite / Perímetro — borda preta, sem preenchimento
+  limite_imovel: { color:'#000000', weight:2.5, fillOpacity:0, opacity:1 },
+  limite:        { color:'#000000', weight:2.5, fillOpacity:0, opacity:1 },
+  perimetro:     { color:'#000000', weight:2.5, fillOpacity:0, opacity:1 },
+  imovel:        { color:'#000000', weight:2.5, fillOpacity:0, opacity:1 },
+
+  // Reserva Legal — verde, HACHURADO por padrão
+  reserva_legal: { color:'#1b5e20', weight:1.5, fillColor:'#4CAF50', fillOpacity:0.55, hatched:true },
+  reserva:       { color:'#1b5e20', weight:1.5, fillColor:'#4CAF50', fillOpacity:0.55, hatched:true },
+  rl_:           { color:'#1b5e20', weight:1.5, fillColor:'#4CAF50', fillOpacity:0.55, hatched:true },
+
+  // Remanescente — verde sólido
+  remanescente:  { color:'#000000', weight:1.2, fillColor:'#66BB6A', fillOpacity:0.45 },
+  reman:         { color:'#000000', weight:1.2, fillColor:'#66BB6A', fillOpacity:0.45 },
+
+  // APP — azul
+  area_app:      { color:'#000000', weight:1.5, fillColor:'#42A5F5', fillOpacity:0.45 },
+  app:           { color:'#000000', weight:1.5, fillColor:'#42A5F5', fillOpacity:0.45 },
+
+  // Hidrografia / Drenagem / BRM / Lagoa — azul
+  hidrografia:   { color:'#000000', weight:1.5, fillColor:'#29b6f6', fillOpacity:0.50 },
+  drenagem:      { color:'#000000', weight:1.5, fillColor:'#29b6f6', fillOpacity:0.45 },
+  brm:           { color:'#000000', weight:1.5, fillColor:'#42A5F5', fillOpacity:0.45 },
+  lagoa:         { color:'#000000', weight:1.5, fillColor:'#29b6f6', fillOpacity:0.55 },
+  nascente:      { color:'#000000', weight:1.5, fillColor:'#42A5F5', fillOpacity:0.50 },
+  nasc:          { color:'#000000', weight:1.5, fillColor:'#42A5F5', fillOpacity:0.50 },
+  curso_dagua:   { color:'#000000', weight:2.0, fillOpacity:0, opacity:1 },
+  corpo_dagua:   { color:'#000000', weight:1.5, fillColor:'#29b6f6', fillOpacity:0.45 },
+
+  // Uso do Solo
+  uso_solo:      { color:'#000000', weight:1.0, fillColor:'#FFC107', fillOpacity:0.40 },
+  uso:           { color:'#000000', weight:1.0, fillColor:'#FFC107', fillOpacity:0.40 },
+
+  // Consolidado — bege
+  consolidado:   { color:'#000000', weight:1.0, fillColor:'#C4A882', fillOpacity:0.50 },
+  consolidada:   { color:'#000000', weight:1.0, fillColor:'#C4A882', fillOpacity:0.50 },
+  consol:        { color:'#000000', weight:1.0, fillColor:'#C4A882', fillOpacity:0.50 },
+  cons:          { color:'#000000', weight:1.0, fillColor:'#C4A882', fillOpacity:0.50 },
+
+  // Servidão
+  servidao:      { color:'#000000', weight:1.5, fillColor:'#FF7043', fillOpacity:0.40, dashArray:'6,4' },
+  serv:          { color:'#000000', weight:1.5, fillColor:'#FF7043', fillOpacity:0.35 },
+
+  // Vegetação
+  vegetacao:     { color:'#000000', weight:1.0, fillColor:'#8BC34A', fillOpacity:0.45 },
+
+  // Edificações / Construções
+  edificacao:    { color:'#000000', weight:1.0, fillColor:'#90A4AE', fillOpacity:0.70 },
+  construcao:    { color:'#000000', weight:1.0, fillColor:'#90A4AE', fillOpacity:0.70 },
+
+  // Estradas / Vias
+  estrada:       { color:'#000000', weight:2.0, fillOpacity:0, opacity:1 },
+  via:           { color:'#000000', weight:1.5, fillOpacity:0, opacity:1 },
+
+  // Padrão (não identificado) — borda preta + fill colorido automático
+  default:       { color:'#000000', weight:1.5, fillColor:'#3388ff', fillOpacity:0.30 },
 };
 const AUTO_PALETTE = ['#e53935','#8e24aa','#1e88e5','#00897b','#f4511e','#6d4c41','#546e7a','#c0ca33','#fdd835','#00acc1'];
 
@@ -588,8 +628,9 @@ function resolveStyle(name, custom) {
   for (const [k, s] of Object.entries(STYLES)) {
     if (k !== 'default' && key.includes(k)) return { ...s };
   }
+  // fallback: borda preta + cor automática
   const c = AUTO_PALETTE[autoColorIdx++ % AUTO_PALETTE.length];
-  return { color:c, weight:1.5, fillColor:c, fillOpacity:0.35, opacity:1 };
+  return { color:'#000000', weight:1.5, fillColor:c, fillOpacity:0.35, opacity:1 };
 }
 
 /* cor que aparece no swatch (fill se existir, senão borda) */
@@ -1007,7 +1048,7 @@ function toggleBasemaps(titleEl) {
 }
 
 /* ── PERSISTÊNCIA DE ESTILOS (localStorage) ──────────── */
-const STORAGE_KEY = 'dbematex_styles_v1';
+const STORAGE_KEY = 'dbematex_styles_v2'; // v2: novos padrões de cor
 
 function styleKey(gIdx, slIdx) {
   const g  = groups[gIdx];
@@ -1031,7 +1072,11 @@ function saveStyles() {
       };
     });
   });
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(saved)); } catch(e) {}
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
+  } catch(e) {
+    console.error('[DBEMATEX] Falha ao salvar estilos no localStorage:', e);
+  }
 }
 
 function loadSavedStyle(gIdx, slIdx) {
@@ -1088,6 +1133,21 @@ function restoreSavedStyles() {
         const vchk = document.getElementById(`sv-${gIdx}-${slIdx}`);
         if (vchk) vchk.checked = true;
         toggleVazado(gIdx, slIdx, true);
+      }
+    });
+  });
+}
+
+/* aplica hachura em TODAS as camadas que têm hatched:true no estilo
+   (inclui padrão STYLES + estilos restaurados do localStorage) */
+function applyAllDefaultHatch() {
+  groups.forEach((g, gIdx) => {
+    g.subLayers.forEach((sl, slIdx) => {
+      if (sl.style.hatched && !sl.style.vazado) {
+        applyHatchToLayer(sl, gIdx, slIdx);
+        // sincroniza checkbox no painel se estiver aberto
+        const hchk = document.getElementById(`sh-${gIdx}-${slIdx}`);
+        if (hchk) hchk.checked = true;
       }
     });
   });
@@ -1311,7 +1371,8 @@ async function main() {
     document.getElementById('hdr-status').textContent =
       `${groups.length} arquivo${groups.length!==1?'s':''}, ${totalSub} feição${totalSub!==1?'ões':''}`;
 
-    restoreSavedStyles(); // ← restaura cores salvas
+    restoreSavedStyles();      // restaura cores salvas no localStorage
+    applyAllDefaultHatch();    // aplica hachura padrão (reserva legal etc.)
     fitAll();
 
   } catch(err) {
