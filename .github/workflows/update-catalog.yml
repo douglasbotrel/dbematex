@@ -1,10 +1,13 @@
 name: Atualizar catálogo de camadas
 
-# Dispara automaticamente quando arquivos da pasta data/ são enviados
+# Dispara apenas quando arquivos de dados são enviados (ignora catalog.json para evitar loop)
 on:
   push:
     paths:
-      - 'data/**'
+      - 'data/**.zip'
+      - 'data/**.geojson'
+      - 'data/**.shp'
+      - 'data/**.json'
   workflow_dispatch:   # permite rodar manualmente pelo site do GitHub
 
 jobs:
