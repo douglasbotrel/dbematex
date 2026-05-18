@@ -359,12 +359,27 @@
     .sp-check-lbl { font-size: 10px; color: #64748b; cursor: pointer; user-select: none; display: flex; align-items: center; gap: 5px; }
     .sp-check-lbl input[type=checkbox] { accent-color: #3b82f6; width: 13px; height: 13px; cursor: pointer; }
 
+    /* ── EXPORT / IMPORT ─────────────────────── */
+    .sb-tools-bar {
+      display: flex; gap: 5px; padding: 6px 10px;
+      border-bottom: 1px solid #e2e8f0; flex-shrink: 0; background: #f8fafc;
+    }
+    .sb-tool-btn {
+      flex: 1; display: flex; align-items: center; justify-content: center; gap: 4px;
+      font-size: 10px; color: #64748b; background: #fff; border: 1px solid #e2e8f0;
+      border-radius: 5px; padding: 5px 4px; cursor: pointer;
+      transition: background .15s, color .15s, border-color .15s; white-space: nowrap;
+    }
+    .sb-tool-btn:hover { background: #eff6ff; color: #3b82f6; border-color: #bfdbfe; }
+    .sb-tool-btn i { font-size: 9px; }
+
     /* ── TOAST ───────────────────────────────── */
     #toast-box { position: fixed; bottom: 18px; right: 18px; display: flex; flex-direction: column; gap: 8px; z-index: 9998; }
     .toast { background: #dc2626; color: #fff; padding: 9px 14px; border-radius: 6px;
       font-size: 11.5px; max-width: 320px; box-shadow: 0 3px 12px rgba(0,0,0,.2);
       animation: fadeIn .3s ease; }
     .toast.warn { background: #ea580c; }
+    .toast.ok   { background: #16a34a; }
     @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; } }
   </style>
 </head>
@@ -459,6 +474,16 @@
 
       <div class="layers-header">
         Feições <span id="lyr-count" style="color:#cbd5e1;font-weight:400;margin-left:4px"></span>
+      </div>
+      <!-- barra de exportar / importar cores -->
+      <div class="sb-tools-bar">
+        <button class="sb-tool-btn" onclick="exportStyles()" title="Baixar configuração de cores como arquivo JSON">
+          <i class="fa-solid fa-file-export"></i> Exportar Cores
+        </button>
+        <button class="sb-tool-btn" onclick="document.getElementById('import-input').click()" title="Carregar configuração de cores de um arquivo JSON">
+          <i class="fa-solid fa-file-import"></i> Importar Cores
+        </button>
+        <input type="file" id="import-input" accept=".json" style="display:none" onchange="importStyles(event)">
       </div>
       <div id="layer-list">
         <div id="no-layers-msg">
@@ -1219,6 +1244,80 @@ function toggleVazado(gIdx, slIdx, isVazado) {
   saveStyles();
 }
 
+/* ── EXPORTAR / IMPORTAR CORES ───────────────────────── */
+function exportStyles() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    const data = raw ? JSON.parse(raw) : {};
+    if (!Object.keys(data).length) { toast('Nenhuma cor personalizada para exportar.','warn'); return; }
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href = url; a.download = 'dbematex-estilos.json'; a.click();
+    URL.revokeObjectURL(url);
+  } catch(e) { toast('Erro ao exportar: ' + e.message); }
+}
+
+function importStyles(evt) {
+  const file = evt.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const data = JSON.parse(ev.target.result);
+      if (typeof data !== 'object' || Array.isArray(data)) throw new Error('Formato inválido');
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      restoreSavedStyles();
+      applyAllDefaultHatch();
+      toast('Cores importadas com sucesso! ✓', 'ok');
+    } catch(e) { toast('Erro ao importar: ' + e.message); }
+    evt.target.value = '';  // reset so same file can be re-selected
+  };
+  reader.readAsText(file);
+}
+
+/* ── GITHUB API — descoberta automática de ZIPs ──────── */
+async function fetchCatalogFromGithubApi() {
+  /* Funciona somente no GitHub Pages: username.github.io/repo */
+  const host = window.location.hostname;
+  if (!host.endsWith('.github.io')) return null;
+
+  const owner = host.replace('.github.io', '');
+  /* o primeiro segmento do path é o repositório; caso seja raiz user-page usa próprio host */
+  const parts = window.location.pathname.split('/').filter(Boolean);
+  const repo  = parts[0] || (owner + '.github.io');
+
+  const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/data`;
+  console.log('[DBEMATEX] Buscando catálogo via GitHub API:', apiUrl);
+  const resp = await fetch(apiUrl, {
+    headers: { 'Accept': 'application/vnd.github.v3+json' },
+    cache: 'no-store',
+  });
+  if (!resp.ok) throw new Error(`GitHub API ${resp.status}: ${apiUrl}`);
+  const files = await resp.json();
+
+  const supported = ['zip', 'geojson', 'json'];
+  const layers = files
+    .filter(f => {
+      if (f.type !== 'file') return false;
+      const ext = f.name.split('.').pop().toLowerCase();
+      if (!supported.includes(ext)) return false;
+      if (f.name === 'catalog.json') return false;  // evitar auto-referência
+      return true;
+    })
+    .map(f => {
+      const base = f.name.replace(/\.[^.]+$/, '');
+      return {
+        id:      base,
+        name:    base.replace(/[_-]/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
+        file:    encodeURI('data/' + f.name),
+        visible: true,
+      };
+    });
+
+  console.log(`[DBEMATEX] GitHub API: ${layers.length} camadas encontradas`);
+  return { layers };
+}
+
 /* ── DASHBOARD ───────────────────────────────────────── */
 function layerCategory(name) {
   const n = (name||'').toLowerCase().replace(/[\s\-\.]/g,'_');
@@ -1323,7 +1422,7 @@ function dashOverlayClick(e) { if (e.target===document.getElementById('dashboard
 /* ── TOAST ───────────────────────────────────────────── */
 function toast(msg, type='error') {
   const el = document.createElement('div');
-  el.className = `toast${type==='warn'?' warn':''}`;
+  el.className = 'toast' + (type==='warn'?' warn':type==='ok'?' ok':'');
   el.textContent = msg;
   document.getElementById('toast-box').appendChild(el);
   setTimeout(() => el.remove(), 5500);
@@ -1338,10 +1437,23 @@ async function main() {
   const noMsg      = document.getElementById('no-layers-msg');
 
   try {
+    /* 1ª tentativa: catalog.json gerado pelo GitHub Actions */
     loadingMsg.textContent = 'Carregando catálogo…';
-    const resp = await fetch('data/catalog.json?v=' + Date.now(), { cache: 'no-store' });
-    if (!resp.ok) throw new Error('catalog.json não encontrado');
-    const catalog = await resp.json();
+    let catalog = null;
+    try {
+      const resp = await fetch('data/catalog.json?v=' + Date.now(), { cache: 'no-store' });
+      if (!resp.ok) throw new Error('catalog.json não encontrado');
+      catalog = await resp.json();
+    } catch(catalogErr) {
+      /* 2ª tentativa: descoberta automática via GitHub Contents API */
+      loadingMsg.textContent = 'Buscando camadas via GitHub API…';
+      try {
+        catalog = await fetchCatalogFromGithubApi();
+      } catch(apiErr) {
+        console.warn('[DBEMATEX] GitHub API falhou:', apiErr.message);
+      }
+      if (!catalog) throw catalogErr;  // re-lança erro original (mostra mensagem ao usuário)
+    }
     const defs = catalog.layers || [];
 
     if (!defs.length) {
