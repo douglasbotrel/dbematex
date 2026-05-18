@@ -2,6 +2,41 @@
   "title": "DBEMATEX - WebGIS Ambiental",
   "layers": [
     {
+      "id": "cacau_22s",
+      "name": "Cacau 22S",
+      "file": "data/CACAU_22S.zip",
+      "visible": true,
+      "style": null
+    },
+    {
+      "id": "flona_alt_21s",
+      "name": "Flona Alt 21S",
+      "file": "data/FLONA_ALT_21S.zip",
+      "visible": true,
+      "style": null
+    },
+    {
+      "id": "flona_amp_22s",
+      "name": "Flona Amp 22S",
+      "file": "data/FLONA_AMP_22S.zip",
+      "visible": true,
+      "style": null
+    },
+    {
+      "id": "flona_jam_20s",
+      "name": "Flona Jam 20S",
+      "file": "data/FLONA_JAM_20S.zip",
+      "visible": true,
+      "style": null
+    },
+    {
+      "id": "faz_600",
+      "name": "Faz 600",
+      "file": "data/Faz 600.zip",
+      "visible": true,
+      "style": null
+    },
+    {
       "id": "faz_atlantica",
       "name": "Fazenda Atlântica",
       "file": "data/Faz Atlantica.zip",
@@ -9,9 +44,93 @@
       "style": null
     },
     {
+      "id": "faz_brigadeiro",
+      "name": "Faz Brigadeiro",
+      "file": "data/Faz Brigadeiro.zip",
+      "visible": true,
+      "style": null
+    },
+    {
       "id": "faz_cafe",
       "name": "Fazenda Café",
       "file": "data/Faz CAFE.zip",
+      "visible": true,
+      "style": null
+    },
+    {
+      "id": "faz_mata_do_meio",
+      "name": "Faz Mata Do Meio",
+      "file": "data/Faz Mata do Meio.zip",
+      "visible": true,
+      "style": null
+    },
+    {
+      "id": "faz_orlando",
+      "name": "Faz Orlando",
+      "file": "data/Faz Orlando.zip",
+      "visible": true,
+      "style": null
+    },
+    {
+      "id": "faz_riacho",
+      "name": "Faz Riacho",
+      "file": "data/Faz Riacho.zip",
+      "visible": true,
+      "style": null
+    },
+    {
+      "id": "faz_richard",
+      "name": "Faz Richard",
+      "file": "data/Faz Richard.zip",
+      "visible": true,
+      "style": null
+    },
+    {
+      "id": "faz_toco_serra_igrejinha",
+      "name": "Faz Toco Serra Igrejinha",
+      "file": "data/Faz Toco Serra Igrejinha.zip",
+      "visible": true,
+      "style": null
+    },
+    {
+      "id": "faz_tubiata_galego",
+      "name": "Faz Tubiata Galego",
+      "file": "data/Faz Tubiata Galego.zip",
+      "visible": true,
+      "style": null
+    },
+    {
+      "id": "sf2_20s",
+      "name": "Sf2 20S",
+      "file": "data/SF2_20S.zip",
+      "visible": true,
+      "style": null
+    },
+    {
+      "id": "transect_alt",
+      "name": "Transect Alt",
+      "file": "data/Transect_ALT.zip",
+      "visible": true,
+      "style": null
+    },
+    {
+      "id": "transect_amp",
+      "name": "Transect Amp",
+      "file": "data/Transect_AMP.zip",
+      "visible": true,
+      "style": null
+    },
+    {
+      "id": "transect_jam",
+      "name": "Transect Jam",
+      "file": "data/Transect_JAM.zip",
+      "visible": true,
+      "style": null
+    },
+    {
+      "id": "umfs_upas",
+      "name": "Umfs Upas",
+      "file": "data/UMFs_UPAs.zip",
       "visible": true,
       "style": null
     }
