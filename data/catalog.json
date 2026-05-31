@@ -16,6 +16,13 @@
       "style": null
     },
     {
+      "id": "faz_barroca_nosso_sr",
+      "name": "Faz Barroca Nosso Sr",
+      "file": "data/Faz Barroca Nosso Sr.zip",
+      "visible": true,
+      "style": null
+    },
+    {
       "id": "faz_brigadeiro",
       "name": "Faz Brigadeiro",
       "file": "data/Faz Brigadeiro.zip",
@@ -61,6 +68,13 @@
       "id": "faz_richard",
       "name": "Faz Richard",
       "file": "data/Faz Richard.zip",
+      "visible": true,
+      "style": null
+    },
+    {
+      "id": "faz_sarinha",
+      "name": "Faz Sarinha",
+      "file": "data/Faz Sarinha.zip",
       "visible": true,
       "style": null
     },
