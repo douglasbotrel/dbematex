@@ -300,14 +300,17 @@
     }
     #dashboard-overlay.open { display: flex; }
     #dashboard-panel {
-      background: #fff; border-radius: 12px; width: 100%; max-width: 800px;
+      background: #fff; border-radius: 12px; width: 100%; max-width: 920px;
       box-shadow: 0 20px 60px rgba(0,0,0,.4); overflow: hidden;
-      animation: slideUp .25s ease;
+      animation: slideUp .25s ease; display: flex; flex-direction: column;
+      max-height: calc(100vh - 48px);
     }
     @keyframes slideUp { from { transform:translateY(20px); opacity:0; } to { transform:translateY(0); opacity:1; } }
+
+    /* cabeçalho */
     .db-header {
-      background: #0d1b2a; color: #e0f2f1;
-      padding: 16px 20px; display: flex; align-items: center; gap: 12px;
+      background: #0d1b2a; color: #e0f2f1; flex-shrink: 0;
+      padding: 14px 20px; display: flex; align-items: center; gap: 12px;
     }
     .db-header h2 { font-size: 14px; font-weight: 700; flex: 1; letter-spacing: .3px; }
     .db-close {
@@ -315,43 +318,101 @@
       padding: 4px 9px; border-radius: 5px; transition: background .2s; line-height: 1;
     }
     .db-close:hover { background: rgba(255,255,255,.12); }
-    .db-body { padding: 20px; display: flex; flex-direction: column; gap: 16px; background: #f8fafc; }
-    .db-card { border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; background: #fff; }
-    .db-card-head {
-      background: #f1f5f9; padding: 10px 14px;
-      display: flex; align-items: center; gap: 8px;
+
+    /* barra de abas */
+    .db-tabs {
+      display: flex; overflow-x: auto; background: #1e3a5f; flex-shrink: 0;
+      scrollbar-width: thin; scrollbar-color: #2d5a8e transparent;
+    }
+    .db-tabs::-webkit-scrollbar { height: 3px; }
+    .db-tabs::-webkit-scrollbar-thumb { background: #2d5a8e; border-radius: 2px; }
+    .db-tab {
+      padding: 9px 16px; font-size: 11px; font-weight: 600; white-space: nowrap;
+      color: #90caf9; cursor: pointer; border-bottom: 3px solid transparent;
+      transition: background .15s, color .15s, border-color .15s;
+      display: flex; align-items: center; gap: 6px; flex-shrink: 0;
+    }
+    .db-tab:hover { background: rgba(255,255,255,.07); color: #e0f2f1; }
+    .db-tab.active { border-bottom-color: #38bdf8; color: #e0f2f1; background: rgba(255,255,255,.09); }
+    .db-tab-total {
+      margin-left: auto; border-left: 1px solid rgba(255,255,255,.1);
+      background: rgba(56,189,248,.12); color: #38bdf8;
+    }
+    .db-tab-total:hover { background: rgba(56,189,248,.2); }
+    .db-tab-total.active { border-bottom-color: #38bdf8; }
+
+    /* corpo com scroll */
+    .db-body { flex: 1; overflow-y: auto; background: #f8fafc; }
+
+    /* painel de cada aba */
+    .db-pane { display: none; padding: 18px 20px; flex-direction: column; gap: 14px; }
+    .db-pane.active { display: flex; }
+
+    /* tabela de camadas dentro de cada fazenda */
+    .db-table-wrap { border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; background: #fff; }
+    .db-table-title {
+      background: #f1f5f9; padding: 9px 14px;
+      font-size: 11px; font-weight: 700; color: #1e293b;
       border-bottom: 1px solid #e2e8f0;
-      font-size: 12px; font-weight: 700; color: #1e293b;
+      display: flex; align-items: center; gap: 7px;
     }
-    .db-card-body { padding: 12px; display: grid; grid-template-columns: repeat(auto-fill, minmax(160px,1fr)); gap: 10px; }
-    .db-stat {
-      display: flex; flex-direction: column; gap: 3px;
-      background: #f8fafc; border-radius: 6px; padding: 10px 12px;
-      border-left: 3px solid #e2e8f0;
+    table.db-tbl { width: 100%; border-collapse: collapse; font-size: 11.5px; }
+    table.db-tbl thead tr { background: #f8fafc; }
+    table.db-tbl th {
+      padding: 8px 12px; text-align: left; font-size: 9.5px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 1px; color: #94a3b8;
+      border-bottom: 1px solid #e2e8f0;
     }
-    .db-stat-label { font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: #94a3b8; font-weight: 700; }
-    .db-stat-value { font-size: 16px; font-weight: 700; color: #1e293b; }
-    .db-stat-unit { font-size: 10px; color: #94a3b8; margin-top: -2px; }
-    .db-stat-unit strong { color: #475569; font-weight: 700; }
-    .db-stat.total   { border-left-color: #1e293b; }
-    .db-stat.app     { border-left-color: #0d47a1; }
-    .db-stat.reserva { border-left-color: #1b5e20; }
-    .db-stat.consol  { border-left-color: #4a148c; }
-    .db-stat.other   { border-left-color: #94a3b8; }
-    .db-totals-card {
-      border: 1px solid #0d1b2a; border-radius: 8px;
-      background: #0d1b2a; overflow: hidden;
+    table.db-tbl th.right { text-align: right; }
+    table.db-tbl td { padding: 8px 12px; border-bottom: 1px solid #f1f5f9; color: #334155; }
+    table.db-tbl td.right { text-align: right; font-variant-numeric: tabular-nums; }
+    table.db-tbl tr:last-child td { border-bottom: none; }
+    table.db-tbl tr:hover td { background: #f8fafc; }
+    table.db-tbl .tbl-sum td {
+      background: #0d1b2a; color: #e0f2f1; font-weight: 700;
+      border-bottom: none; font-size: 12px;
     }
-    .db-totals-head {
-      padding: 10px 14px; font-size: 11px; font-weight: 700;
-      color: #90caf9; letter-spacing: .5px; border-bottom: 1px solid rgba(255,255,255,.08);
-      display: flex; align-items: center; gap: 8px;
+    table.db-tbl .tbl-sum td.right { color: #38bdf8; }
+
+    /* mini pill de categoria */
+    .db-cat-pill {
+      display: inline-flex; align-items: center; gap: 3px;
+      font-size: 9px; font-weight: 700; padding: 2px 6px;
+      border-radius: 10px; text-transform: uppercase; letter-spacing: .5px;
     }
-    .db-totals-body { padding: 12px; display: grid; grid-template-columns: repeat(auto-fill, minmax(150px,1fr)); gap: 10px; }
-    .db-tot-stat { display: flex; flex-direction: column; gap: 3px; }
-    .db-tot-label { font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: #546e7a; font-weight: 700; }
-    .db-tot-value { font-size: 16px; font-weight: 700; color: #e0f2f1; }
-    .db-tot-unit { font-size: 10px; color: #546e7a; margin-top: -2px; }
+    .pill-total   { background: #1e293b22; color: #1e293b; }
+    .pill-app     { background: #0d47a122; color: #0d47a1; }
+    .pill-reserva { background: #1b5e2022; color: #1b5e20; }
+    .pill-consol  { background: #4a148c22; color: #4a148c; }
+    .pill-other   { background: #94a3b822; color: #475569; }
+
+    /* card de resumo de totais da fazenda */
+    .db-summary-row {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(140px,1fr)); gap: 10px;
+    }
+    .db-sum-card {
+      background: #fff; border: 1px solid #e2e8f0; border-radius: 8px;
+      padding: 10px 14px; display: flex; flex-direction: column; gap: 3px;
+    }
+    .db-sum-label { font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: #94a3b8; font-weight: 700; }
+    .db-sum-value { font-size: 18px; font-weight: 800; color: #1e293b; }
+    .db-sum-sub   { font-size: 10px; color: #94a3b8; }
+    .db-sum-sub strong { color: #475569; }
+
+    /* painel de totais gerais */
+    .db-grand-wrap { background: #0d1b2a; border-radius: 8px; padding: 14px 18px; }
+    .db-grand-title {
+      font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px;
+      color: #90caf9; font-weight: 700; margin-bottom: 12px;
+      display: flex; align-items: center; gap: 7px;
+    }
+    .db-grand-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px,1fr)); gap: 10px; }
+    .db-grand-card { display: flex; flex-direction: column; gap: 3px; }
+    .db-grand-label { font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: #546e7a; font-weight: 700; }
+    .db-grand-value { font-size: 18px; font-weight: 800; color: #e0f2f1; }
+    .db-grand-sub   { font-size: 10px; color: #546e7a; }
+    .db-grand-sub strong { color: #90caf9; }
+
     .db-no-data { padding: 30px; text-align: center; color: #94a3b8; font-size: 12px; }
 
     /* ── HATCH ───────────────────────────────────── */
@@ -511,9 +572,10 @@
       <h2>Dashboard Ambiental — Resumo de Áreas</h2>
       <button class="db-close" onclick="closeDashboard()" title="Fechar">✕</button>
     </div>
-    <div class="db-body" id="db-body">
-      <div class="db-no-data">Carregando…</div>
-    </div>
+    <!-- abas geradas dinamicamente -->
+    <div class="db-tabs" id="db-tabs"></div>
+    <!-- painéis gerados dinamicamente -->
+    <div class="db-body" id="db-body"></div>
   </div>
 </div>
 
@@ -1337,85 +1399,218 @@ function calcFcArea(fc) {
 }
 
 const CAT_META = {
-  total:   { label:'Área Total (Limite)', color:'#1e293b', icon:'fa-vector-square' },
-  app:     { label:'APP',                 color:'#0d47a1', icon:'fa-water' },
-  reserva: { label:'Reserva Legal',       color:'#1b5e20', icon:'fa-tree' },
-  consol:  { label:'Área Consolidada',    color:'#4a148c', icon:'fa-layer-group' },
-  other:   { label:'Outras Feições',      color:'#64748b', icon:'fa-map' },
+  total:   { label:'Limite / Imóvel',  color:'#1e293b', icon:'fa-vector-square', pill:'pill-total'   },
+  app:     { label:'APP',              color:'#0d47a1', icon:'fa-water',         pill:'pill-app'     },
+  reserva: { label:'Reserva Legal',    color:'#1b5e20', icon:'fa-tree',          pill:'pill-reserva' },
+  consol:  { label:'Consolidado',      color:'#4a148c', icon:'fa-layer-group',   pill:'pill-consol'  },
+  other:   { label:'Outras Feições',   color:'#64748b', icon:'fa-map',           pill:'pill-other'   },
 };
 
 function fmtPct(part, total) {
-  if (!total || total === 0) return '';
-  const pct = (part / total * 100);
-  return pct.toFixed(1).replace('.', ',') + '%';
+  if (!total) return '—';
+  return (part / total * 100).toFixed(1).replace('.', ',') + '%';
+}
+
+let _dbActiveTab = 0;
+
+function dbSwitchTab(idx) {
+  _dbActiveTab = idx;
+  document.querySelectorAll('.db-tab').forEach((t,i)  => t.classList.toggle('active', i === idx));
+  document.querySelectorAll('.db-pane').forEach((p,i) => p.classList.toggle('active', i === idx));
 }
 
 function buildDashboard() {
-  const body = document.getElementById('db-body');
+  const tabsEl = document.getElementById('db-tabs');
+  const body   = document.getElementById('db-body');
+
   if (!groups.length) {
-    body.innerHTML = '<div class="db-no-data">📂 Nenhuma camada carregada.</div>'; return;
+    tabsEl.innerHTML = '';
+    body.innerHTML   = '<div class="db-no-data">📂 Nenhuma camada carregada.</div>';
+    return;
   }
-  const totals = {total:0, app:0, reserva:0, consol:0, other:0};
-  let html = '';
 
-  groups.forEach(g => {
-    const cats = {total:0, app:0, reserva:0, consol:0, other:0};
-    g.subLayers.forEach(sl => {
-      if (!sl.fc) return;
-      cats[layerCategory(sl.name)] += calcFcArea(sl.fc);
+  /* ── acumula dados por grupo e globais ─────────────── */
+  const grandTotals = {};  // { categoria: sqm }
+
+  const groupData = groups.map(g => {
+    /* lista completa de sub-camadas com área individual */
+    const rows = g.subLayers.map(sl => {
+      const sqm = sl.fc ? calcFcArea(sl.fc) : 0;
+      const cat = layerCategory(sl.name);
+      return { name: sl.name, sqm, cat };
     });
-    Object.entries(cats).forEach(([k,v]) => { totals[k] += v; });
 
-    const totalRef = cats.total || 0;   // área total desta fazenda = base para %
+    /* somatório por categoria nesta fazenda */
+    const catTotals = {};
+    rows.forEach(r => {
+      catTotals[r.cat] = (catTotals[r.cat] || 0) + r.sqm;
+      grandTotals[r.cat] = (grandTotals[r.cat] || 0) + r.sqm;
+    });
 
-    html += `<div class="db-card">
-      <div class="db-card-head"><i class="fa-regular fa-folder" style="color:#94a3b8"></i> ${g.cfg.name}</div>
-      <div class="db-card-body">`;
-    const hasData = Object.values(cats).some(v => v > 0);
-    if (!hasData) {
-      html += `<div style="grid-column:1/-1;color:#94a3b8;font-size:11px;text-align:center;padding:10px;">
-                 Área não disponível (verifique a projeção do shapefile)</div>`;
-    } else {
-      Object.entries(cats).forEach(([cat, sqm]) => {
-        if (sqm === 0) return;
-        const m   = CAT_META[cat];
-        const pct = cat === 'total' ? '' : fmtPct(sqm, totalRef);
-        html += `<div class="db-stat ${cat}">
-          <div style="display:flex;align-items:baseline;justify-content:space-between;gap:4px;">
-            <span class="db-stat-label">
-              <i class="fa-solid ${m.icon}" style="color:${m.color};font-size:8px"></i> ${m.label}
-            </span>
-            ${pct ? `<span style="font-size:10px;font-weight:700;color:${m.color};opacity:.85">${pct}</span>` : ''}
-          </div>
-          <span class="db-stat-value">${fmtHa(sqm)}</span>
-          <span class="db-stat-unit">hectares${pct ? ` · <strong>${pct}</strong> da área total` : ''}</span>
-        </div>`;
-      });
-    }
-    html += `</div></div>`;
+    const totalSqm = rows.reduce((s,r) => s + r.sqm, 0);
+    return { g, rows, catTotals, totalSqm };
   });
 
-  if (Object.values(totals).some(v => v > 0)) {
-    const totalRefGeral = totals.total || 0;
-    html += `<div class="db-totals-card">
-      <div class="db-totals-head"><i class="fa-solid fa-sigma"></i> Totais Gerais — Todas as Fazendas</div>
-      <div class="db-totals-body">`;
-    Object.entries(totals).forEach(([cat, sqm]) => {
-      if (sqm === 0) return;
+  /* ── monta abas ────────────────────────────────────── */
+  let tabsHtml = '';
+  groupData.forEach((d, i) => {
+    const active = i === _dbActiveTab ? 'active' : '';
+    tabsHtml += `<div class="db-tab ${active}" onclick="dbSwitchTab(${i})">
+      <i class="fa-regular fa-folder" style="font-size:10px"></i>
+      ${d.g.cfg.name}
+    </div>`;
+  });
+  /* aba de totais gerais */
+  const totalActive = _dbActiveTab === groupData.length ? 'active' : '';
+  tabsHtml += `<div class="db-tab db-tab-total ${totalActive}" onclick="dbSwitchTab(${groupData.length})">
+    <i class="fa-solid fa-sigma" style="font-size:10px"></i> Totais Gerais
+  </div>`;
+  tabsEl.innerHTML = tabsHtml;
+
+  /* ── monta painéis por fazenda ─────────────────────── */
+  let panesHtml = '';
+
+  groupData.forEach((d, i) => {
+    const active      = i === _dbActiveTab ? 'active' : '';
+    const totalRefSqm = d.catTotals['total'] || 0;
+
+    /* tabela linha a linha */
+    let tRows = '';
+    d.rows.forEach(r => {
+      if (r.sqm === 0) return;
+      const m   = CAT_META[r.cat];
+      const pct = totalRefSqm ? fmtPct(r.sqm, totalRefSqm) : '—';
+      tRows += `<tr>
+        <td>${r.name}</td>
+        <td><span class="db-cat-pill ${m.pill}">
+          <i class="fa-solid ${m.icon}" style="font-size:7px"></i> ${m.label}
+        </span></td>
+        <td class="right">${fmtHa(r.sqm)}</td>
+        <td class="right">${pct}</td>
+      </tr>`;
+    });
+
+    /* somatório por categoria */
+    let catRows = '';
+    Object.entries(d.catTotals).forEach(([cat, sqm]) => {
+      if (!sqm) return;
       const m   = CAT_META[cat];
-      const pct = cat === 'total' ? '' : fmtPct(sqm, totalRefGeral);
-      html += `<div class="db-tot-stat">
-        <span class="db-tot-label"><i class="fa-solid ${m.icon}" style="color:${m.color};font-size:8px"></i> ${m.label}</span>
-        <span class="db-tot-value">${fmtHa(sqm)}</span>
-        <span class="db-tot-unit">hectares${pct ? ` · <strong style="color:#90caf9">${pct}</strong>` : ''}</span>
+      const pct = cat !== 'total' && totalRefSqm ? fmtPct(sqm, totalRefSqm) : '—';
+      catRows += `<div class="db-sum-card">
+        <span class="db-sum-label"><i class="fa-solid ${m.icon}" style="color:${m.color};font-size:8px"></i> ${m.label}</span>
+        <span class="db-sum-value">${fmtHa(sqm)}</span>
+        <span class="db-sum-sub">ha ${pct !== '—' ? `· <strong>${pct}</strong>` : ''}</span>
       </div>`;
     });
-    html += `</div></div>`;
-  }
-  body.innerHTML = html;
+
+    const totalHa   = fmtHa(d.totalSqm);
+    const noData    = d.rows.every(r => r.sqm === 0);
+
+    panesHtml += `<div class="db-pane ${active}" id="db-pane-${i}">
+      ${noData
+        ? `<div class="db-no-data">⚠️ Área não disponível — verifique a projeção do shapefile.</div>`
+        : `<!-- tabela detalhada -->
+           <div class="db-table-wrap">
+             <div class="db-table-title">
+               <i class="fa-solid fa-table" style="color:#94a3b8;font-size:10px"></i>
+               Detalhe das camadas — ${d.g.cfg.name}
+             </div>
+             <table class="db-tbl">
+               <thead><tr>
+                 <th>Camada</th>
+                 <th>Categoria</th>
+                 <th class="right">Área (ha)</th>
+                 <th class="right">% do Limite</th>
+               </tr></thead>
+               <tbody>
+                 ${tRows}
+                 <tr class="tbl-sum">
+                   <td colspan="2"><i class="fa-solid fa-sigma" style="font-size:9px"></i> Total de todas as camadas</td>
+                   <td class="right">${totalHa}</td>
+                   <td class="right">—</td>
+                 </tr>
+               </tbody>
+             </table>
+           </div>
+           <!-- resumo por categoria -->
+           <div class="db-summary-row">${catRows}</div>`
+      }
+    </div>`;
+  });
+
+  /* ── painel de totais gerais ───────────────────────── */
+  const grandActive = _dbActiveTab === groupData.length ? 'active' : '';
+  let grandRows = '';
+  const grandLimite = grandTotals['total'] || 0;
+  Object.entries(grandTotals).forEach(([cat, sqm]) => {
+    if (!sqm) return;
+    const m   = CAT_META[cat];
+    const pct = cat !== 'total' && grandLimite ? fmtPct(sqm, grandLimite) : '—';
+    grandRows += `<div class="db-grand-card">
+      <span class="db-grand-label"><i class="fa-solid ${m.icon}" style="color:${m.color};font-size:8px"></i> ${m.label}</span>
+      <span class="db-grand-value">${fmtHa(sqm)}</span>
+      <span class="db-grand-sub">ha ${pct !== '—' ? `· <strong>${pct}</strong>` : ''}</span>
+    </div>`;
+  });
+
+  /* tabela de totais gerais por fazenda */
+  let grandTableRows = '';
+  groupData.forEach(d => {
+    const lim = d.catTotals['total'] || 0;
+    const app = d.catTotals['app']   || 0;
+    const res = d.catTotals['reserva']||0;
+    const con = d.catTotals['consol'] ||0;
+    grandTableRows += `<tr>
+      <td><strong>${d.g.cfg.name}</strong></td>
+      <td class="right">${lim  ? fmtHa(lim) : '—'}</td>
+      <td class="right">${app  ? fmtHa(app) : '—'}</td>
+      <td class="right">${res  ? fmtHa(res) : '—'}</td>
+      <td class="right">${con  ? fmtHa(con) : '—'}</td>
+    </tr>`;
+  });
+
+  panesHtml += `<div class="db-pane ${grandActive}" id="db-pane-${groupData.length}">
+    <!-- cards totais -->
+    <div class="db-grand-wrap">
+      <div class="db-grand-title"><i class="fa-solid fa-sigma"></i> Somatório Geral — Todas as Fazendas</div>
+      <div class="db-grand-grid">${grandRows}</div>
+    </div>
+    <!-- tabela comparativa por fazenda -->
+    <div class="db-table-wrap">
+      <div class="db-table-title">
+        <i class="fa-solid fa-table-list" style="color:#94a3b8;font-size:10px"></i>
+        Comparativo por Fazenda (ha)
+      </div>
+      <table class="db-tbl">
+        <thead><tr>
+          <th>Fazenda / Imóvel</th>
+          <th class="right">Limite</th>
+          <th class="right">APP</th>
+          <th class="right">Reserva Legal</th>
+          <th class="right">Consolidado</th>
+        </tr></thead>
+        <tbody>
+          ${grandTableRows}
+          <tr class="tbl-sum">
+            <td><i class="fa-solid fa-sigma" style="font-size:9px"></i> Total Geral</td>
+            <td class="right">${grandTotals['total']   ? fmtHa(grandTotals['total'])   : '—'}</td>
+            <td class="right">${grandTotals['app']     ? fmtHa(grandTotals['app'])     : '—'}</td>
+            <td class="right">${grandTotals['reserva'] ? fmtHa(grandTotals['reserva']) : '—'}</td>
+            <td class="right">${grandTotals['consol']  ? fmtHa(grandTotals['consol'])  : '—'}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>`;
+
+  body.innerHTML = panesHtml;
 }
 
-function openDashboard()  { buildDashboard(); document.getElementById('dashboard-overlay').classList.add('open'); }
+function openDashboard()  {
+  _dbActiveTab = 0;
+  buildDashboard();
+  document.getElementById('dashboard-overlay').classList.add('open');
+}
 function closeDashboard() { document.getElementById('dashboard-overlay').classList.remove('open'); }
 function dashOverlayClick(e) { if (e.target===document.getElementById('dashboard-overlay')) closeDashboard(); }
 
