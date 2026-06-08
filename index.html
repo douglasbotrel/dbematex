@@ -55,43 +55,54 @@
     }
     .sb-head h3 { font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: #94a3b8; font-weight: 700; }
 
-    /* basemaps */
-    .sb-section { border-bottom: 1px solid #e2e8f0; flex-shrink: 0; }
-    .sb-section-title { padding: 9px 14px 5px; font-size: 9.5px; text-transform: uppercase; letter-spacing: 1.5px; color: #94a3b8; font-weight: 700; }
-    .bm-list { padding: 0 10px 10px; display: flex; flex-direction: column; gap: 2px; }
-    .bm-group-label { font-size: 9px; color: #cbd5e1; text-align: center; padding: 5px 0 2px; letter-spacing: 1px; user-select: none; }
-
-    /* basemap section collapsible */
-    .sb-section-title.collapsible {
-      cursor: pointer; display: flex; align-items: center;
-      justify-content: space-between; padding-right: 14px;
-      transition: color .15s;
+    /* ── FLOATING BASEMAP BUTTON ──────────────── */
+    #bm-btn {
+      position: absolute; bottom: 100px; right: 10px; z-index: 700;
+      width: 36px; height: 36px; border-radius: 8px;
+      background: #fff; border: 1px solid #e2e8f0;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,.15);
+      transition: background .15s, box-shadow .15s; color: #475569; font-size: 14px;
     }
-    .sb-section-title.collapsible:hover { color: #64748b; }
-    .sb-collapse-icon { font-size: 9px; transition: transform .2s; }
-    .sb-collapse-icon.open { transform: rotate(180deg); }
-    .bm-list.collapsed { display: none; }
+    #bm-btn:hover { background: #f1f5f9; box-shadow: 0 3px 12px rgba(0,0,0,.2); color: #1e40af; }
+    #bm-btn.open  { background: #dbeafe; color: #1d4ed8; border-color: #93c5fd; }
 
+    #bm-panel {
+      position: absolute; bottom: 144px; right: 10px; z-index: 700;
+      width: 210px; background: #fff; border-radius: 10px;
+      border: 1px solid #e2e8f0; box-shadow: 0 8px 30px rgba(0,0,0,.18);
+      overflow: hidden; display: none; animation: bmSlide .18s ease;
+    }
+    #bm-panel.open { display: block; }
+    @keyframes bmSlide { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+
+    .bm-panel-head {
+      padding: 8px 12px; font-size: 9px; font-weight: 700; letter-spacing: 1.5px;
+      text-transform: uppercase; color: #94a3b8; border-bottom: 1px solid #f1f5f9;
+      background: #f8fafc;
+    }
+    .bm-group-sep { padding: 5px 12px 2px; font-size: 8.5px; color: #cbd5e1; letter-spacing: 1px; text-transform: uppercase; }
     .bm-opt {
-      display: flex; align-items: center; gap: 9px; padding: 6px 9px;
-      border-radius: 6px; cursor: pointer; color: #64748b; font-size: 11.5px;
-      transition: background .15s, color .15s; user-select: none;
+      display: flex; align-items: center; gap: 9px; padding: 7px 12px;
+      cursor: pointer; color: #475569; font-size: 11.5px;
+      transition: background .12s, color .12s; user-select: none;
     }
-    .bm-opt:hover { background: #f1f5f9; color: #334155; }
+    .bm-opt:hover { background: #f1f5f9; color: #1e293b; }
     .bm-opt.active { background: #dbeafe; color: #1d4ed8; font-weight: 600; }
-    .bm-thumb { width: 26px; height: 18px; border-radius: 3px; border: 1px solid #e2e8f0; flex-shrink: 0; }
+    .bm-thumb { width: 28px; height: 20px; border-radius: 4px; border: 1px solid #e2e8f0; flex-shrink: 0; }
 
     /* layer list */
     .layers-header {
-      padding: 9px 14px 5px; font-size: 9.5px; text-transform: uppercase;
+      padding: 9px 14px 7px; font-size: 9.5px; text-transform: uppercase;
       letter-spacing: 1.5px; color: #94a3b8; font-weight: 700;
       display: flex; align-items: center; justify-content: space-between;
       flex-shrink: 0; border-bottom: 1px solid #e2e8f0;
     }
-    #layer-list { flex: 1; overflow-y: auto; padding-bottom: 10px; }
-    #layer-list::-webkit-scrollbar { width: 4px; }
+    #layer-list { flex: 1; overflow-y: auto; padding-bottom: 14px; }
+    #layer-list::-webkit-scrollbar { width: 5px; }
     #layer-list::-webkit-scrollbar-track { background: #f8fafc; }
-    #layer-list::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 2px; }
+    #layer-list::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+    #layer-list::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
     /* ── DRAG SHARED ──────────────────────────── */
     .drag-handle {
@@ -137,9 +148,11 @@
     .grp-icon { font-size: 11px; color: #94a3b8; flex-shrink: 0; }
     .grp-name { flex: 1; color: #1e293b; font-size: 12px; font-weight: 600;
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .grp-count { font-size: 9px; color: #94a3b8; white-space: nowrap; }
-    .grp-fit-btn { font-size: 11px; color: #94a3b8; padding: 3px 5px; border-radius: 4px; cursor: pointer; transition: color .15s, background .15s; }
-    .grp-fit-btn:hover { color: #3b82f6; background: #eff6ff; }
+    .grp-count { font-size: 9px; color: #94a3b8; white-space: nowrap; background: #f1f5f9;
+      padding: 1px 5px; border-radius: 8px; }
+    .grp-fit-btn { font-size: 11px; color: #94a3b8; padding: 4px 6px; border-radius: 5px;
+      cursor: pointer; transition: color .15s, background .15s; }
+    .grp-fit-btn:hover { color: #2563eb; background: #dbeafe; }
 
     /* ── SUB-LAYERS ───────────────────────────── */
     .sub-layers { display: none; background: #fafbfc; padding-bottom: 4px; }
@@ -494,45 +507,6 @@
         <h3>Painel de Camadas</h3>
       </div>
 
-      <div class="sb-section">
-        <div class="sb-section-title collapsible" onclick="toggleBasemaps(this)">
-          <span>Mapa Base</span>
-          <i class="fa-solid fa-chevron-down sb-collapse-icon open"></i>
-        </div>
-        <div class="bm-list" id="bm-list">
-          <div class="bm-group-label">— Padrão —</div>
-          <div class="bm-opt active" onclick="setBasemap('osm',this)">
-            <div class="bm-thumb" style="background:linear-gradient(135deg,#b8d8b4,#85c1d0)"></div>OpenStreetMap
-          </div>
-          <div class="bm-opt" onclick="setBasemap('carto-dark',this)">
-            <div class="bm-thumb" style="background:linear-gradient(135deg,#1a1a2e,#16213e)"></div>Escuro (CARTO)
-          </div>
-          <div class="bm-group-label">— Satélite —</div>
-          <div class="bm-opt" onclick="setBasemap('esri-sat',this)">
-            <div class="bm-thumb" style="background:linear-gradient(135deg,#2c3e2d,#3d6148)"></div>Satélite (ESRI)
-          </div>
-          <div class="bm-opt" onclick="setBasemap('google-sat',this)">
-            <div class="bm-thumb" style="background:linear-gradient(135deg,#1a3318,#2d5e2d)"></div>Google Satélite
-          </div>
-          <div class="bm-group-label">— Relevo / Topografia —</div>
-          <div class="bm-opt" onclick="setBasemap('esri-topo',this)">
-            <div class="bm-thumb" style="background:linear-gradient(135deg,#d4c5a9,#a5b89a)"></div>Topográfico (ESRI)
-          </div>
-          <div class="bm-opt" onclick="setBasemap('open-topo',this)">
-            <div class="bm-thumb" style="background:linear-gradient(135deg,#c8bda0,#8fa87a)"></div>OpenTopoMap
-          </div>
-          <div class="bm-opt" onclick="setBasemap('hillshade',this)">
-            <div class="bm-thumb" style="background:linear-gradient(135deg,#d0ccc4,#8a8070)"></div>Sombreamento (Relevo)
-          </div>
-          <div class="bm-opt" onclick="setBasemap('hillshade-dark',this)">
-            <div class="bm-thumb" style="background:linear-gradient(135deg,#3a3630,#1e1b17)"></div>Relevo Escuro (ESRI)
-          </div>
-          <div class="bm-opt" onclick="setBasemap('sat-hillshade',this)">
-            <div class="bm-thumb" style="background:linear-gradient(135deg,#2c3e2d,#6b6050)"></div>Satélite + Relevo ✦
-          </div>
-        </div>
-      </div>
-
       <div class="layers-header">
         Feições <span id="lyr-count" style="color:#cbd5e1;font-weight:400;margin-left:4px"></span>
       </div>
@@ -561,6 +535,44 @@
       </button>
       <div id="map"></div>
       <div id="coords">Lat: —  &nbsp; Lon: —</div>
+
+      <!-- ── BOTÃO FLUTUANTE DE MAPAS BASE ── -->
+      <button id="bm-btn" onclick="toggleBmPanel()" title="Selecionar mapa base">
+        <i class="fa-solid fa-layer-group"></i>
+      </button>
+      <div id="bm-panel">
+        <div class="bm-panel-head">Mapa Base</div>
+        <div class="bm-group-sep">Padrão</div>
+        <div class="bm-opt active" id="bm-osm" onclick="setBasemap('osm',this)">
+          <div class="bm-thumb" style="background:linear-gradient(135deg,#b8d8b4,#85c1d0)"></div>OpenStreetMap
+        </div>
+        <div class="bm-opt" id="bm-carto-dark" onclick="setBasemap('carto-dark',this)">
+          <div class="bm-thumb" style="background:linear-gradient(135deg,#1a1a2e,#16213e)"></div>Escuro (CARTO)
+        </div>
+        <div class="bm-group-sep">Satélite</div>
+        <div class="bm-opt" id="bm-esri-sat" onclick="setBasemap('esri-sat',this)">
+          <div class="bm-thumb" style="background:linear-gradient(135deg,#2c3e2d,#3d6148)"></div>Satélite ESRI
+        </div>
+        <div class="bm-opt" id="bm-google-sat" onclick="setBasemap('google-sat',this)">
+          <div class="bm-thumb" style="background:linear-gradient(135deg,#1a3318,#2d5e2d)"></div>Google Satélite
+        </div>
+        <div class="bm-opt" id="bm-sat-hillshade" onclick="setBasemap('sat-hillshade',this)">
+          <div class="bm-thumb" style="background:linear-gradient(135deg,#2c3e2d,#6b6050)"></div>Satélite + Relevo
+        </div>
+        <div class="bm-group-sep">Topografia</div>
+        <div class="bm-opt" id="bm-esri-topo" onclick="setBasemap('esri-topo',this)">
+          <div class="bm-thumb" style="background:linear-gradient(135deg,#d4c5a9,#a5b89a)"></div>Topográfico ESRI
+        </div>
+        <div class="bm-opt" id="bm-open-topo" onclick="setBasemap('open-topo',this)">
+          <div class="bm-thumb" style="background:linear-gradient(135deg,#c8bda0,#8fa87a)"></div>OpenTopoMap
+        </div>
+        <div class="bm-opt" id="bm-hillshade" onclick="setBasemap('hillshade',this)">
+          <div class="bm-thumb" style="background:linear-gradient(135deg,#d0ccc4,#8a8070)"></div>Sombreamento
+        </div>
+        <div class="bm-opt" id="bm-hillshade-dark" onclick="setBasemap('hillshade-dark',this)">
+          <div class="bm-thumb" style="background:linear-gradient(135deg,#3a3630,#1e1b17)"></div>Relevo Escuro
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -687,6 +699,9 @@ function initMap() {
     document.getElementById('coords').textContent =
       `Lat: ${e.latlng.lat.toFixed(6)}   Lon: ${e.latlng.lng.toFixed(6)}`;
   });
+
+  // re-aplica hachura/vazado após zoom (Leaflet recria os paths SVG no zoom)
+  map.on('zoomend', () => setTimeout(reapplyAllFills, 50));
 }
 
 function setBasemap(name, el) {
@@ -697,9 +712,34 @@ function setBasemap(name, el) {
   const bm = baseLayers[name];
   if (bm.composite) { bm.tiles.forEach(t => t.addTo(map)); bm.tiles[0].bringToBack(); }
   else { bm.tile.addTo(map); bm.tile.bringToBack(); }
-  document.querySelectorAll('.bm-opt').forEach(e => e.classList.remove('active'));
-  el.classList.add('active');
+  document.querySelectorAll('#bm-panel .bm-opt').forEach(e => e.classList.remove('active'));
+  if (el) el.classList.add('active');
+  // fecha painel após seleção
+  closeBmPanel();
+  // re-aplica hachuras pois a troca de tile pode re-renderizar paths
+  setTimeout(reapplyAllFills, 80);
 }
+
+/* ── PAINEL FLUTUANTE DE MAPAS BASE ──────────────────── */
+function toggleBmPanel() {
+  const panel = document.getElementById('bm-panel');
+  const btn   = document.getElementById('bm-btn');
+  const isOpen = panel.classList.contains('open');
+  if (isOpen) { closeBmPanel(); } else {
+    panel.classList.add('open');
+    btn.classList.add('open');
+  }
+}
+function closeBmPanel() {
+  document.getElementById('bm-panel').classList.remove('open');
+  document.getElementById('bm-btn').classList.remove('open');
+}
+// fecha ao clicar fora do painel
+document.addEventListener('click', e => {
+  const panel = document.getElementById('bm-panel');
+  const btn   = document.getElementById('bm-btn');
+  if (panel && btn && !panel.contains(e.target) && !btn.contains(e.target)) closeBmPanel();
+});
 
 function toggleSidebar() {
   sbOpen = !sbOpen;
@@ -889,7 +929,7 @@ function buildStylePanel(gIdx, slIdx, sl) {
         <i class="fa-solid fa-water" style="font-size:9px;color:#94a3b8"></i> Hachurado
       </label>
       <label class="sp-check-lbl">
-        <input type="checkbox" id="sv-${gIdx}-${slIdx}" ${sl.style.fillOpacity===0?'checked':''}
+        <input type="checkbox" id="sv-${gIdx}-${slIdx}" ${sl.style.vazado?'checked':''}
                onchange="toggleVazado(${gIdx},${slIdx},this.checked)">
         <i class="fa-regular fa-square" style="font-size:9px;color:#94a3b8"></i> Vazado (sem fill)
       </label>
@@ -931,7 +971,7 @@ function toggleStylePanel(gIdx, slIdx) {
 /* swatch click → cor principal (fill ou borda se sem fill) */
 function applySwatchColor(gIdx, slIdx, newColor) {
   const sl = groups[gIdx].subLayers[slIdx];
-  if (sl.style.fillOpacity > 0) {
+  if (sl.style.fillOpacity > 0 || sl.style.hatched) {
     sl.style.fillColor = newColor;
     sl.leafletLayer.setStyle({ fillColor: newColor });
     const inp = document.getElementById(`sfc-${gIdx}-${slIdx}`);
@@ -943,7 +983,12 @@ function applySwatchColor(gIdx, slIdx, newColor) {
     if (inp) inp.value = newColor;
   }
   document.getElementById(`ssw-${gIdx}-${slIdx}`).style.cssText = swatchCSS(sl.style);
-  if (sl.style.hatched) applyHatchToLayer(sl, gIdx, slIdx);
+  // aplica efeito de preenchimento correto, respeitando prioridade vazado > hachura
+  if (sl.style.vazado) {
+    applyVazadoDOM(sl);
+  } else if (sl.style.hatched) {
+    applyHatchToLayer(sl, gIdx, slIdx);
+  }
   saveStyles();
 }
 
@@ -955,11 +1000,19 @@ function applyStyle(gIdx, slIdx) {
   const opac    = parseFloat(document.getElementById(`so-${gIdx}-${slIdx}`).value) / 100;
   const wt      = parseFloat(document.getElementById(`sw-${gIdx}-${slIdx}`).value);
   const hatched = document.getElementById(`sh-${gIdx}-${slIdx}`)?.checked || false;
-  sl.style = { ...sl.style, color, fillColor:fill, fillOpacity:opac, weight:wt, hatched };
+  const vazado  = sl.style.vazado || false;
+
+  sl.style = { ...sl.style, color, fillColor:fill, fillOpacity:opac, weight:wt, hatched, vazado };
+  // setStyle primeiro — restabelece base visual
   sl.leafletLayer.setStyle({ color, fillColor:fill, fillOpacity: hatched ? Math.max(opac,0.01) : opac, weight:wt });
-  if (hatched) {
+
+  if (vazado) {
+    // vazado tem prioridade absoluta — garante fill:none mesmo após setStyle
+    applyVazadoDOM(sl);
+  } else if (hatched) {
     applyHatchToLayer(sl, gIdx, slIdx);
   }
+
   document.getElementById(`ssw-${gIdx}-${slIdx}`).style.cssText = swatchCSS(sl.style);
   document.getElementById(`cpick-${gIdx}-${slIdx}`).value = swatchColor(sl.style);
   saveStyles();
@@ -1126,14 +1179,6 @@ function applyLeafletZOrder() {
   });
 }
 
-/* ── BASEMAP SECTION TOGGLE ──────────────────────────── */
-function toggleBasemaps(titleEl) {
-  const list = document.getElementById('bm-list');
-  const icon = titleEl.querySelector('.sb-collapse-icon');
-  list.classList.toggle('collapsed');
-  icon.classList.toggle('open', !list.classList.contains('collapsed'));
-}
-
 /* ── PERSISTÊNCIA DE ESTILOS (localStorage) ──────────── */
 const STORAGE_KEY = 'dbematex_styles_v2'; // v2: novos padrões de cor
 
@@ -1240,6 +1285,33 @@ function applyAllDefaultHatch() {
   });
 }
 
+/* ── HELPERS DOM PARA FILL ───────────────────────────── */
+/* aplica fill:none diretamente no SVG path de todos os sub-features */
+function applyVazadoDOM(sl) {
+  sl.leafletLayer.eachLayer(l => {
+    if (l._path) {
+      l._path.style.fill        = 'none';
+      l._path.style.fillOpacity = '0';
+      l._path.setAttribute('fill',         'none');
+      l._path.setAttribute('fill-opacity', '0');
+    }
+  });
+}
+
+/* re-aplica hachura/vazado em TODAS as camadas (chamado após zoom/pan do Leaflet) */
+function reapplyAllFills() {
+  groups.forEach((g, gIdx) => {
+    g.subLayers.forEach((sl, slIdx) => {
+      if (!sl.visible) return;
+      if (sl.style.vazado) {
+        applyVazadoDOM(sl);
+      } else if (sl.style.hatched) {
+        applyHatchToLayer(sl, gIdx, slIdx);
+      }
+    });
+  });
+}
+
 /* ── HACHURA (SVG pattern) ───────────────────────────── */
 function getOrCreateHatchPattern(gIdx, slIdx, color) {
   const id = `hatch-${gIdx}-${slIdx}`;
@@ -1286,23 +1358,19 @@ function toggleVazado(gIdx, slIdx, isVazado) {
   sl.style.vazado = isVazado;
 
   if (isVazado) {
-    /* remove qualquer fill, inclusive o hachura — o usuário quer ver a camada de baixo */
-    sl.leafletLayer.eachLayer(l => {
-      if (l._path) {
-        l._path.style.fill = 'none';
-        l._path.style.fillOpacity = '0';
-        l._path.setAttribute('fill', 'none');
-        l._path.setAttribute('fill-opacity', '0');
-      }
-    });
+    applyVazadoDOM(sl);
   } else {
-    /* restaura: sólido ou hachura conforme o estado */
-    const opac = sl.style.fillOpacity > 0 ? sl.style.fillOpacity : 0.35;
-    sl.leafletLayer.setStyle({ fillColor: sl.style.fillColor || sl.style.color, fillOpacity: opac });
+    /* restaura: sólido ou hachura conforme o estado salvo */
+    const opac = (sl.style.fillOpacity > 0) ? sl.style.fillOpacity : 0.35;
+    sl.leafletLayer.setStyle({
+      fillColor:   sl.style.fillColor || sl.style.color,
+      fillOpacity: opac,
+    });
     if (sl.style.hatched) applyHatchToLayer(sl, gIdx, slIdx);
   }
 
-  document.getElementById(`ssw-${gIdx}-${slIdx}`).style.cssText = swatchCSS(sl.style);
+  const sw = document.getElementById(`ssw-${gIdx}-${slIdx}`);
+  if (sw) sw.style.cssText = swatchCSS(sl.style);
   saveStyles();
 }
 
