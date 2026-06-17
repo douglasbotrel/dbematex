@@ -72,6 +72,13 @@
       "style": null
     },
     {
+      "id": "faz_santo_antonio",
+      "name": "Faz Santo Antonio",
+      "file": "data/Faz Santo Antonio.zip",
+      "visible": true,
+      "style": null
+    },
+    {
       "id": "faz_sarinha",
       "name": "Faz Sarinha",
       "file": "data/Faz Sarinha.zip",
