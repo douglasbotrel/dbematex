@@ -455,6 +455,15 @@
     .toast.warn { background: #ea580c; }
     .toast.ok   { background: #16a34a; }
     @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; } }
+
+    /* ── ÍCONE OUTORGA / CAPTAÇÃO DE ÁGUA ──────── */
+    .water-capture-icon {
+      width: 24px; height: 24px; border-radius: 50%;
+      background: #0288d1; border: 2px solid #fff;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 1px 4px rgba(0,0,0,.45);
+    }
+    .water-capture-icon i { color: #fff; font-size: 11px; line-height: 1; }
   </style>
 </head>
 <body>
@@ -632,6 +641,10 @@ const STYLES = {
   curso_dagua:   { color:'#000000', weight:2.0, fillOpacity:0, opacity:1 },
   corpo_dagua:   { color:'#000000', weight:1.5, fillColor:'#29b6f6', fillOpacity:0.45 },
 
+  // Outorga / Captação de Água — ícone fixo (gota), igual em todas as fazendas
+  outorga:       { color:'#01579b', weight:1.5, fillColor:'#0288d1', fillOpacity:0.85, icon:'water-capture' },
+  captacao:      { color:'#01579b', weight:1.5, fillColor:'#0288d1', fillOpacity:0.85, icon:'water-capture' },
+
   // Uso do Solo
   uso_solo:      { color:'#000000', weight:1.0, fillColor:'#FFC107', fillOpacity:0.40 },
   uso:           { color:'#000000', weight:1.0, fillColor:'#FFC107', fillOpacity:0.40 },
@@ -661,6 +674,16 @@ const STYLES = {
   default:       { color:'#000000', weight:1.5, fillColor:'#3388ff', fillOpacity:0.30 },
 };
 const AUTO_PALETTE = ['#e53935','#8e24aa','#1e88e5','#00897b','#f4511e','#6d4c41','#546e7a','#c0ca33','#fdd835','#00acc1'];
+
+/* Ícone fixo para pontos de Outorga / Captação de Água.
+   Minimalista (gota), idêntico em qualquer fazenda — não muda por estilo/cor da camada. */
+const WATER_CAPTURE_ICON = L.divIcon({
+  className: 'water-capture-icon',
+  html: '<i class="fa-solid fa-droplet"></i>',
+  iconSize: [24, 24],
+  iconAnchor: [12, 12],
+  popupAnchor: [0, -12],
+});
 
 let map;
 const baseLayers = {};
@@ -749,9 +772,13 @@ function toggleSidebar() {
 }
 
 /* ── ESTILO ──────────────────────────────────────────── */
+function stripAccents(s) {
+  return s.normalize('NFD').replace(/\p{Diacritic}/gu, '');
+}
+
 function resolveStyle(name, custom) {
   if (custom && Object.keys(custom).length > 0) return { ...STYLES.default, ...custom };
-  const key = (name || '').toLowerCase().replace(/[\s\-\.]/g, '_');
+  const key = stripAccents((name || '').toLowerCase()).replace(/[\s\-\.]/g, '_');
   for (const [k, s] of Object.entries(STYLES)) {
     if (k !== 'default' && key.includes(k)) return { ...s };
   }
@@ -782,9 +809,10 @@ async function loadGroup(cfg, gIdx) {
     const slName  = fc.fileName || cfg.name;
     const style   = resolveStyle(slName, slIdx === 0 ? cfg.style : null);
     const visible = cfg.visible !== false;
+    const isWaterCapture = style.icon === 'water-capture';
     const leafletLayer = L.geoJSON(fc, {
       style: () => ({ ...style }),
-      pointToLayer: (feat, ll) => L.circleMarker(ll, {
+      pointToLayer: (feat, ll) => isWaterCapture ? L.marker(ll, { icon: WATER_CAPTURE_ICON }) : L.circleMarker(ll, {
         radius:6, fillColor:style.fillColor||style.color,
         color:style.color, weight:1.5, opacity:1,
         fillOpacity: style.fillOpacity > 0 ? style.fillOpacity : 0.8,
